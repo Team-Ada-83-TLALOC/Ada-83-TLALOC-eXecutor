@@ -1,0 +1,78 @@
+	LINK 0, 64
+	LIF 2.5
+	CVTFIR
+	CALL , PHEX
+	LIF -2.5
+	CVTFIR
+	CALL , PHEX
+	LI 0x1234500
+	LI 5
+	CGT
+	CALL , PHEX
+	SYS_EXIT 0
+PNUM_:					; affiche le parametre en 2 chiffres hexa suivi de ':'
+	LINK 1, 0
+	LQ 1, -8
+	LI 4
+	SHR
+	CALL , CHIFFRE
+	LQ 1, -8
+	LI 15
+	ET
+	CALL , CHIFFRE
+	LI ':'
+	SYS_PUT_CHAR
+	UNLINKR 1
+	RTD 8
+
+CHIFFRE_:				; affiche un chiffre hexa
+	LINK 2, 0
+	LQ 2, -8
+	DUP
+	LI 9
+	CGT
+	BF .dec
+	LI 7
+	ADD
+.dec:
+	LI '0'
+	ADD
+	SYS_PUT_CHAR
+	UNLINKR 2
+	RTD 8
+
+PHEX_:					; affiche le parametre en 16 chiffres hexa et fin de ligne
+	LINK 1, 8
+	LI 60
+	SQ 1, 8
+.boucle:
+	LQ 1, -8
+	LQ 1, 8
+	SHR
+	LI 15
+	ET
+	CALL , CHIFFRE
+	LQ 1, 8
+	LI 4
+	SUB
+	DUP
+	SQ 1, 8
+	LI 0
+	CGE
+	BT .boucle
+	LI 10
+	SYS_PUT_CHAR
+	UNLINKR 1
+	RTD 8
+
+LEVER_:
+	LINK 1, 16
+	LI 0x3333
+	LI 0x4444
+	CALL , LEVER2
+	RTD 0
+
+LEVER2_:
+	LINK 2, 0
+	LI 0x5555
+	EXC_RAISE 8

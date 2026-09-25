@@ -1,0 +1,29 @@
+--  Profilage dynamique de l'execution LLIR.
+--  Pour chaque instruction executee : comptage par code, et taille qu'elle
+--  occuperait dans les deux flux de LLIR_hardware_support (1 octet d'opcode,
+--  complement dans le flux des arguments).
+with Interfaces; use Interfaces;
+package Profil is
+
+   type Compteur is range 0 .. 2**62;
+
+   procedure Instruction (Op : Integer; Lvl : Integer;
+                          Ofs, Val : Unsigned_64; PC : Unsigned_64);
+   procedure Acces (Lvl : Integer; Courant : Integer);   -- familles B et C
+   procedure Service (N : Integer);                      -- TRAP n
+   procedure Booleen_Non_Normalise (PC, V : Unsigned_64);  -- BT/BF sur valeur hors {0,1}
+   procedure Decalage_Hors_Mot;                          -- compte de decalage >= 64
+   procedure Champ_Limite;                               -- champ de bits de largeur 0 ou >= 64
+
+   --  Maxima tenus par la machine
+   Max_Pile_Octets   : Unsigned_64 := 0;
+   Max_Retours       : Natural := 0;
+   Max_Copile_Octets : Unsigned_64 := 0;
+   Max_Tas_Octets    : Unsigned_64 := 0;
+   Max_Niveau        : Integer := 0;
+
+   function Total return Compteur;
+
+   procedure Rapport (Nom_Fichier : String);   -- "" : sur la sortie d'erreur
+
+end Profil;
