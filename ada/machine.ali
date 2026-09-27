@@ -1,0 +1,787 @@
+V "GNAT Lib v13"
+A -O2
+A -gnatn
+A -gnatp
+P SS ZX
+
+RN
+RV NO_DIRECT_BOOLEAN_OPERATORS
+RV NO_EXCEPTION_HANDLERS
+RV NO_EXCEPTION_PROPAGATION
+RV NO_EXCEPTIONS
+RV NO_FLOATING_POINT
+RV NO_LOCAL_ALLOCATORS
+RV NO_SECONDARY_STACK
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_DYNAMIC_SIZED_OBJECTS
+RV NO_ELABORATION_CODE
+
+U machine%b		machine.adb		9048f257 OO PK
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+W decodeur_hx%s		decodeur_hx.adb		decodeur_hx.ali
+W frontal%s		frontal.adb		frontal.ali
+W hote%s		hote.adb		hote.ali
+W limites%s		limites.adb		limites.ali
+W memoire%s		memoire.adb		memoire.ali
+W profil%s		profil.adb		profil.ali
+Z system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+W tx_codes%s		tx_codes.ads		tx_codes.ali
+
+U machine%s		machine.ads		55704779 EE NE OO PK
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+W interfaces%s		interfac.ads		interfac.ali
+W mots%s		mots.adb		mots.ali
+
+D ada.ads		20240521074738 76789da1 ada%s
+D a-direio.ads		20240521074738 a93c9b31 ada.direct_io%s
+D a-except.ads		20240521074738 2a7d8d70 ada.exceptions%s
+D a-ioexce.ads		20240521074738 40018c65 ada.io_exceptions%s
+D a-stream.ads		20240521074738 119b8fb3 ada.streams%s
+D a-string.ads		20240521074738 90ac6797 ada.strings%s
+D a-sttebu.ads		20240521074738 f1ad67a2 ada.strings.text_buffers%s
+D a-stuten.ads		20240521074738 c6ced0ae ada.strings.utf_encoding%s
+D a-tags.ads		20240521074738 9eaa38c6 ada.tags%s
+D a-textio.ads		20240521074738 5c2c6153 ada.text_io%s
+D a-unccon.ads		20240521074738 0e9b276f ada.unchecked_conversion%s
+D decodeur_hx.ads	20260927112248 cd66ec21 decodeur_hx%s
+D directio.ads		20240521074738 d9b35108 direct_io%s
+D frontal.ads		20260927112248 09f2a9db frontal%s
+D hote.ads		20260927112248 5711b47f hote%s
+D interfac.ads		20240521074738 15f799c2 interfaces%s
+D i-cstrea.ads		20240521074738 e53d8b8e interfaces.c_streams%s
+D limites.ads		20260927112248 3fc6b7e6 limites%s
+D machine.ads		20260927112248 c03cc352 machine%s
+D machine.adb		20260927112248 a2a54fe8 machine%b
+D machine-trap.adb	20260927112248 bd698ee2 machine.trap
+D memoire.ads		20260927112248 a94944b1 memoire%s
+D memoire.adb		20260927112248 fa8c8133 memoire%b
+D mots.ads		20260927112248 80bb1de9 mots%s
+D profil.ads		20260927112248 875691f7 profil%s
+D system.ads		20240521074738 426dafb8 system%s
+D s-crtl.ads		20240521074738 8a0692f8 system.crtl%s
+D s-direio.ads		20240521074738 7c86ede3 system.direct_io%s
+D s-exctab.ads		20240521074738 91bef6ef system.exception_table%s
+D s-ficobl.ads		20240521074738 dc5161d4 system.file_control_block%s
+D s-parame.ads		20251218205951 1f39ba92 system.parameters%s
+D s-putima.ads		20240521074738 17291fe4 system.put_images%s
+D s-secsta.ads		20240521074738 578279f5 system.secondary_stack%s
+D s-soflin.ads		20240521074738 df77073e system.soft_links%s
+D s-stache.ads		20240521074738 0b81c1fe system.stack_checking%s
+D s-stalib.ads		20240521074738 1c9580f6 system.standard_library%s
+D s-stoele.ads		20240521074738 ab5468e4 system.storage_elements%s
+D s-stoele.adb		20240521074738 8f5a9db6 system.storage_elements%b
+D s-traent.ads		20240521074738 c81cbf8c system.traceback_entries%s
+D s-unstyp.ads		20240521074738 fa2a7f59 system.unsigned_types%s
+D s-wchcon.ads		20240521074738 d9032363 system.wch_con%s
+D text_io.ads		20240521074738 21b2c898 text_io%s
+D tx_codes.ads		20260927112248 cde4632a tx_codes%s
+D unchconv.ads		20240521074738 ca2f9e18 unchecked_conversion%s
+G a e
+G c Z s b [initialiser machine 7 14 none]
+G c Z s b [executer machine 8 14 none]
+G c Z s b [code_de_sortie machine 10 13 none]
+G c Z s b [pc_courant machine 11 13 none]
+G c Z s b [code_courant machine 12 13 none]
+G c Z s b [instructions_executees machine 13 13 none]
+G c Z s b [instructions_llir machine 14 13 none]
+G c Z s b [octets_lus machine 15 13 none]
+G c Z b b [TretoursBIP machine 19 4 none]
+G c Z b b [lire_8 machine 46 13 none]
+G c Z b b [lire_16 machine 54 13 none]
+G c Z b b [lire_32 machine 62 13 none]
+G c Z b b [lire_64 machine 70 13 none]
+G c Z b b [ecrire_8 machine 78 14 none]
+G c Z b b [ecrire_16 machine 86 14 none]
+G c Z b b [ecrire_32 machine 94 14 none]
+G c Z b b [ecrire_64 machine 102 14 none]
+G c Z b b [empiler machine 113 14 none]
+G c Z b b [depiler machine 128 13 none]
+G c Z b b [sommet machine 142 13 none]
+G c Z b b [remplacer_sommet machine 150 14 none]
+G c Z b b [empiler_retour machine 161 14 none]
+G c Z b b [depiler_retour machine 174 13 none]
+G c Z b b [verifier_niveau machine 185 14 none]
+G c Z b b [booleen machine 193 13 none]
+G c Z b b [etendre_8 machine 202 13 none]
+G c Z b b [etendre_16 machine 210 13 none]
+G c Z b b [etendre_32 machine 218 13 none]
+G c Z b b [arrondi_8 machine 227 13 none]
+G c Z b b [masque machine 232 13 none]
+G c Z b b [compte_decalage machine 245 13 none]
+G c Z b b [abs_mot machine 253 13 none]
+G c Z b b [mul_128 machine 262 14 none]
+G c Z b b [div_128 machine 279 14 none]
+G c Z b b [mul_div machine 307 14 none]
+G c Z b b [tronquer machine 335 13 none]
+G c Z b b [arrondir machine 350 13 none]
+G r c none [initialiser machine 7 14 none] [fin_pile memoire 28 13 none]
+G r c none [initialiser machine 7 14 none] [debut_copile memoire 26 13 none]
+G r c none [initialiser machine 7 14 none] [fin_copile memoire 27 13 none]
+G r c none [initialiser machine 7 14 none] [fin_tas memoire 29 13 none]
+G r c none [initialiser machine 7 14 none] [regions limites 37 14 none]
+G r c none [initialiser machine 7 14 none] [vecteur_ce memoire 30 13 none]
+G r c none [initialiser machine 7 14 none] [acces limites 39 14 none]
+G r c none [initialiser machine 7 14 none] [ecrire_64 memoire 42 14 none]
+G r c none [initialiser machine 7 14 none] [format_hx memoire 20 13 none]
+G r c none [executer machine 8 14 none] [lire decodeur_hx 24 14 none]
+G r c none [executer machine 8 14 none] [lire_instruction memoire 53 14 none]
+G r c none [executer machine 8 14 none] [debut limites 38 14 none]
+G r c none [executer machine 8 14 none] [signaler memoire 10 14 none]
+G r c none [executer machine 8 14 none] [instruction profil 10 14 none]
+G r c none [executer machine 8 14 none] [lire_pile memoire 49 13 none]
+G r c none [executer machine 8 14 none] [acces limites 39 14 none]
+G r c none [executer machine 8 14 none] [ecrire_pile memoire 50 14 none]
+G r c none [executer machine 8 14 none] [acces profil 13 14 none]
+G r c none [executer machine 8 14 none] [adresse_suivante limites 42 14 none]
+G r c none [executer machine 8 14 none] [image mots 18 13 none]
+G r c none [executer machine 8 14 none] [marquer_local limites 43 14 none]
+G r c none [executer machine 8 14 none] [lire_64 memoire 38 13 none]
+G r c none [executer machine 8 14 none] [lire_8 memoire 35 13 none]
+G r c none [executer machine 8 14 none] [lire_16 memoire 36 13 none]
+G r c none [executer machine 8 14 none] [lire_32 memoire 37 13 none]
+G r c none [executer machine 8 14 none] [ecrire_8 memoire 39 14 none]
+G r c none [executer machine 8 14 none] [ecrire_16 memoire 40 14 none]
+G r c none [executer machine 8 14 none] [ecrire_32 memoire 41 14 none]
+G r c none [executer machine 8 14 none] [ecrire_64 memoire 42 14 none]
+G r c none [executer machine 8 14 none] [decalage_hors_mot profil 16 14 none]
+G r c none [executer machine 8 14 none] [vers_signe mots 9 13 none]
+G r c none [executer machine 8 14 none] [vers_mot mots 10 13 none]
+G r c none [executer machine 8 14 none] [champ_limite profil 17 14 none]
+G r c none [executer machine 8 14 none] [vers_reel mots 11 13 none]
+G r c none [executer machine 8 14 none] [depuis_reel mots 12 13 none]
+G r c none [executer machine 8 14 none] [booleen_non_normalise profil 15 14 none]
+G r c none [executer machine 8 14 none] [fin_pile memoire 28 13 none]
+G r c none [executer machine 8 14 none] [fin_copile memoire 27 13 none]
+G r c none [executer machine 8 14 none] [registre limites 40 14 none]
+G r c none [executer machine 8 14 none] [lien limites 45 14 none]
+G r c none [executer machine 8 14 none] [delien limites 47 14 none]
+G r c none [executer machine 8 14 none] [debut_copile memoire 26 13 none]
+G r c none [executer machine 8 14 none] [fin_tas memoire 29 13 none]
+G r c none [executer machine 8 14 none] [barriere limites 41 14 none]
+G r c none [executer machine 8 14 none] [retablir limites 48 14 none]
+G r c none [executer machine 8 14 none] [copier memoire 45 14 none]
+G r c none [executer machine 8 14 none] [egaux memoire 46 13 none]
+G r c none [executer machine 8 14 none] [image mots 17 13 none]
+G r c none [executer machine 8 14 none] [service profil 14 14 none]
+G r c none [executer machine 8 14 none] [horloge hote 33 14 none]
+G r c none [executer machine 8 14 none] [ecrire hote 21 13 none]
+G r c none [executer machine 8 14 none] [lire_immediat hote 23 14 none]
+G r c none [executer machine 8 14 none] [lire hote 22 14 none]
+G r c none [executer machine 8 14 none] [creer hote 25 13 none]
+G r c none [executer machine 8 14 none] [ouvrir hote 26 13 none]
+G r c none [executer machine 8 14 none] [positionner hote 29 13 none]
+G r c none [executer machine 8 14 none] [position hote 30 13 none]
+G r c none [executer machine 8 14 none] [taille hote 31 13 none]
+G r c none [executer machine 8 14 none] [fermer hote 27 13 none]
+G r c none [executer machine 8 14 none] [detruire hote 28 13 none]
+G r c none [executer machine 8 14 none] [fin limites 49 14 none]
+G r c none [executer machine 8 14 none] [instruction frontal 21 14 none]
+G r c none [lire_8 machine 46 13 none] [acces limites 39 14 none]
+G r c none [lire_8 machine 46 13 none] [lire_8 memoire 35 13 none]
+G r c none [lire_16 machine 54 13 none] [acces limites 39 14 none]
+G r c none [lire_16 machine 54 13 none] [lire_16 memoire 36 13 none]
+G r c none [lire_32 machine 62 13 none] [acces limites 39 14 none]
+G r c none [lire_32 machine 62 13 none] [lire_32 memoire 37 13 none]
+G r c none [lire_64 machine 70 13 none] [acces limites 39 14 none]
+G r c none [lire_64 machine 70 13 none] [lire_64 memoire 38 13 none]
+G r c none [ecrire_8 machine 78 14 none] [acces limites 39 14 none]
+G r c none [ecrire_8 machine 78 14 none] [ecrire_8 memoire 39 14 none]
+G r c none [ecrire_16 machine 86 14 none] [acces limites 39 14 none]
+G r c none [ecrire_16 machine 86 14 none] [ecrire_16 memoire 40 14 none]
+G r c none [ecrire_32 machine 94 14 none] [acces limites 39 14 none]
+G r c none [ecrire_32 machine 94 14 none] [ecrire_32 memoire 41 14 none]
+G r c none [ecrire_64 machine 102 14 none] [acces limites 39 14 none]
+G r c none [ecrire_64 machine 102 14 none] [ecrire_64 memoire 42 14 none]
+G r c none [empiler machine 113 14 none] [signaler memoire 10 14 none]
+G r c none [empiler machine 113 14 none] [ecrire_pile memoire 50 14 none]
+G r c none [empiler machine 113 14 none] [acces limites 39 14 none]
+G r c none [depiler machine 128 13 none] [signaler memoire 10 14 none]
+G r c none [depiler machine 128 13 none] [lire_pile memoire 49 13 none]
+G r c none [depiler machine 128 13 none] [acces limites 39 14 none]
+G r c none [sommet machine 142 13 none] [acces limites 39 14 none]
+G r c none [sommet machine 142 13 none] [lire_pile memoire 49 13 none]
+G r c none [remplacer_sommet machine 150 14 none] [acces limites 39 14 none]
+G r c none [remplacer_sommet machine 150 14 none] [ecrire_pile memoire 50 14 none]
+G r c none [empiler_retour machine 161 14 none] [signaler memoire 10 14 none]
+G r c none [depiler_retour machine 174 13 none] [signaler memoire 10 14 none]
+G r c none [verifier_niveau machine 185 14 none] [image mots 18 13 none]
+G r c none [verifier_niveau machine 185 14 none] [signaler memoire 10 14 none]
+G r c none [masque machine 232 13 none] [champ_limite profil 17 14 none]
+G r c none [compte_decalage machine 245 13 none] [decalage_hors_mot profil 16 14 none]
+G r c none [abs_mot machine 253 13 none] [vers_mot mots 10 13 none]
+G r c none [mul_div machine 307 14 none] [signaler memoire 10 14 none]
+G r c none [mul_div machine 307 14 none] [vers_mot mots 10 13 none]
+G r c none [mul_div machine 307 14 none] [vers_signe mots 9 13 none]
+G r c none [tronquer machine 335 13 none] [vers_mot mots 10 13 none]
+G r c none [arrondir machine 350 13 none] [vers_mot mots 10 13 none]
+X 12 decodeur_hx.ads
+20K9*Decodeur_HX 35e16 20|7w6 551r13
+24U14*Lire 20|551s25
+X 14 frontal.ads
+16K9*Frontal 24e12 20|6w6 1059r13 1060r13
+18b4*Actif{boolean} 20|1059r21
+21U14*Instruction 20|1060s21
+X 15 hote.ads
+10K9*Hote 37e9 20|4w6 21|55r14 60r17 72r14 74r10 91r10 106r17 108r13 122r38
+. 126r38 131r38 135r38 139r38 155r38 159r38
+12A9*Tampon(16|69M9)<integer> 21|55r19 72r19 106r22
+21V13*Ecrire{24|7I9} 21|60s22
+22U14*Lire 21|74s15
+23U14*Lire_Immediat 21|108s18
+25V13*Creer{24|7I9} 21|122s43
+26V13*Ouvrir{24|7I9} 21|126s43
+27V13*Fermer{24|7I9} 21|155s43
+28V13*Detruire{24|7I9} 21|159s43
+29V13*Positionner{24|7I9} 21|131s43
+30V13*Position{24|7I9} 21|135s43
+31V13*Taille{24|7I9} 21|139s43
+33U14*Horloge 21|91s15
+X 16 interfac.ads
+38K9*Interfaces 232e15 19|3w6 3r22
+69M9*Unsigned_8 21|58r22
+83M9*Unsigned_64 19|11r31 20|13r27 16r28 18r45 19r42 35r19 36r19 37r19 40r24
+. 46r25 46r45 54r26 54r46 62r26 62r46 70r26 70r46 78r28 78r45 86r29 86r46
+. 94r29 94r46 102r29 102r46 113r27 128r28 129r11 142r27 150r36 161r34 174r35
+. 193r42 202r28 202r48 210r29 210r49 218r29 218r49 227r28 227r48 232r31 232r51
+. 245r34 253r40 262r30 262r59 263r21 264r21 265r21 266r21 267r22 268r22 269r22
+. 270r22 271r25 279r38 280r50 281r24 310r34 335r46 350r46 360r46 399r31 428r49
+. 429r26 433r46 435r30 455r33 456r14 487r31 511r33 535r29 708r21 902r35 905r35
+. 907r39 919r23 928r52 983r25 985r25 1003r33 1004r33 21|5r43 9r14 15r33 16r23
+. 30r31 38r29 42r55 48r47 58r48 64r45 76r29 76r46 110r29
+165V13*Shift_Left{83M9} 20|229s14 242s14 274s38 291s15 295s28 297s28 632s34
+. 696s48 710s50 711s37
+170V13*Shift_Right{83M9} 20|264s36 266s36 272s9 275s21 275s45 275s69 286s20
+. 288s20 635s34 680s34 689s21 726s21
+175V13*Shift_Right_Arithmetic{83M9} 20|229s26 638s34 648s21 696s24
+X 18 limites.ads
+29K9*Limites 57e12 20|5w6 26r22 26r46 49r10 49r31 57r10 57r31 65r10 65r31
+. 73r10 73r31 81r10 81r31 89r10 89r31 97r10 97r31 105r10 105r31 121r10 121r33
+. 121r51 136r10 136r33 136r50 145r10 145r33 145r50 153r10 153r33 153r51 367r7
+. 368r7 389r10 441r32 443r16 448r29 450r13 463r16 466r32 470r32 472r16 476r13
+. 479r29 481r13 492r13 560r13 561r32 583r19 583r46 583r63 832r35 834r19 834r37
+. 834r54 835r19 835r37 835r54 842r19 857r22 857r40 857r57 860r35 863r19 870r19
+. 870r37 870r54 871r19 871r37 871r54 884r19 884r37 884r53 885r19 885r37 885r53
+. 899r35 911r19 933r19 941r19 948r19 948r40 948r57 949r19 949r40 949r58 957r19
+. 976r19 976r40 976r57 977r19 977r40 977r57 1045r19 1057r13
+31E9*Classe_Acces 31e51 20|26r30
+31n26*Pile{31E9} 20|121r59 136r58 145r58 153r59 583r71 832r43 860r43
+31n32*Directe{31E9} 20|448r37 470r40 899r43
+31n41*Indirecte{31E9} 20|26r54 441r40 466r40 479r37 561r40 948r65 949r66
+. 976r65 977r65
+32n24*Lecture{32E9} 20|49r39 57r39 65r39 73r39 136r41 145r41 583r54 834r62
+. 870r62 884r61 948r48 976r48 977r48
+32n33*Ecriture{32E9} 20|81r39 89r39 97r39 105r39 121r41 153r41 835r62 857r65
+. 871r62 885r61 949r48
+33n30*Reg_CSP{33E9} 20|834r45 835r45 857r48 870r45 871r45
+33n39*Reg_HP{33E9} 20|884r45 885r45
+35b4*Actif{boolean} 20|367m15
+37U14*Regions 20|368s15
+38U14*Debut 20|560s21
+39U14*Acces 20|49s18 57s18 65s18 73s18 81s18 89s18 97s18 105s18 121s18 136s18
+. 145s18 153s18 583s27 948s27 949s27 976s27 977s27
+40U14*Registre 20|834s27 835s27 857s30 870s27 871s27 884s27 885s27
+41U14*Barriere 20|911s27 1045s27
+42U14*Adresse_Suivante 20|443s24 463s24 476s21 492s21 941s27 957s27
+43U14*Marquer_Local 20|450s21 472s24 481s21
+45U14*Lien 20|842s27
+47U14*Delien 20|863s27
+48U14*Retablir 20|933s27
+49U14*Fin 20|1057s21
+52i4*Decalage_PC{natural} 20|389m18
+X 19 machine.ads
+5K9*Machine 17l5 17e12 20|8b14 1072l5 1072t12 21|4r11
+7U14*Initialiser 7>27 7>47 7>63 20|364b14 392l8 392t19
+7b27 Profiler{boolean} 20|364b27 369r22
+7i47 Limite{24|7I9} 20|364b47 370r23
+7b63 Mesurer_Limites{boolean} 20|364b63 366r23 367r24
+8U14*Executer 20|426b14 1070l8 1070t16
+10V13*Code_De_Sortie{integer} 20|394b13 397l8 397t22
+11V13*PC_Courant{16|83M9} 20|399b13 402l8 402t18
+12V13*Code_Courant{integer} 20|404b13 407l8 407t20
+13V13*Instructions_Executees{24|7I9} 20|409b13 412l8 412t30
+14V13*Instructions_LLIR{24|7I9} 20|414b13 417l8 417t25
+15V13*Octets_Lus{24|7I9} 20|419b13 422l8 422t18
+X 20 machine.adb
+10N4 Nb_Niveaux 187r28 924r32
+11N4 Dernier_Niveau 18r26
+12N4 Max_Retours 19r26 22r28 163r16 919r36
+13m4 Masque_32{16|83M9} 263r42 265r42 272r42 272r64 274r24 21|118r45
+16m4 PC{16|83M9} 371m7 401r14 551r31 554r31 568r52 570r24 799r49 842r48 1057r30
+. 1060r34 1063m10
+16m8 DSP{16|83M9} 115r10 118m7 118r14 119r20 121r25 123r10 124r21 131r10
+. 134r23 136r25 138m7 138r14 145r25 147r25 153r25 155r20 372m7 375r18 450r59
+. 472r62 481r43 560r28 583r34 585r36 812m16 812r23 820r36 822r49 825m16 825r23
+. 826r19 827r30 852m16 901r35 930m16 933r37 21|96r34
+16m13 CFP{16|83M9} 380m7 837r32 838m16 855r26 861m16 861r32 903r35 916m16
+16m18 CSP{16|83M9} 378m7 379r18 379r23 380r14 381m7 381r14 829r19 837r27
+. 838r23 839m16 839r23 855m19 873r25 874m16 874r23 875r19 875r39 878r19 879r47
+. 904r35 917m16
+16m23 HP{16|83M9} 382m7 887r23 890m16 890r22 891r25 892r29 893r54
+17i4 RSP{natural} 163r10 166m7 166r14 167r16 168r18 168r37 169r10 170r32
+. 176r10 179m7 179r14 180r23 383m7 438r43 450r53 459r43 472r56 840r27 902r48
+. 922m16
+18a4 Display(16|83M9) 376m7 377m7 452r17 469r18 819r28 820m19 842r33 852r23
+. 853m16 900r21 907r60 913r21 928m19
+19a4 Retours(16|83M9) 167m7 180r14
+22a4 Niveau_De(integer) 168m7 168r26 438r32 450r42 459r32 472r45 840m16
+24b4 Avec_Profil{boolean} 369m7 437r13 458r13 567r13 798r29 1041r19
+25b4 Avec_Limites{boolean} 48r10 56r10 64r10 72r10 80r10 88r10 96r10 104r10
+. 120r10 135r10 144r10 152r10 366m7 442r16 449r13 462r16 471r16 475r13 480r13
+. 491r13 559r13 582r19 833r19 841r19 856r22 862r19 869r19 883r19 910r19 932r19
+. 940r19 947r19 956r19 975r19 1044r19 1056r13
+26e4 Classe_Courante{18|31E9} 49r48 57r48 65r48 73r48 81r49 89r49 97r49 105r49
+. 441m13 448m10 466m13 470m13 479m10 561m13 832m16 860m16 899m16
+27i4 Limite_Instr{24|7I9} 370m7 564r13 564r54
+28i4 Nb_Executees{24|7I9} 384m7 411r14 563m10 563r26 564r39
+29i4 Nb_LLIR{24|7I9} 385m7 416r14 552m13 552r24 556m13 556r24
+30i4 Nb_Octets{24|7I9} 386m7 421r14 571m10 571r23
+31b4 Image_HX{boolean} 387m7 388r10 550r13 1047r19
+32i4 Code_Final{integer} 396r14 21|86m10
+33b4 Fini{boolean} 391m7 1062r20 21|87m10
+34i4 Op_Courant{integer} 406r14 558m10
+35m4 Limite_Pile{16|83M9} 115r17 373m7
+36m4 Max_DSP{16|83M9} 123r16 124m10 375m7 826r25 827m19 1065r33 1068r36
+37m4 CEV{16|83M9} 374m7 1030r22 1033r30
+39f4 Borne_64{long_float} 338r21 338r38 352r20 352r43
+40m4 Indefini{16|83M9} 339r17 353r17
+46V13 Lire_8{16|83M9} 46b13 46>21 52l8 52t14 109r19 500s18 502s45 503s44
+. 504s45 516s49 518s35 538s58 542s47 598s49 602s37 606s50 610s38 965s36 21|42s37
+. 58s34
+46m21 A{16|83M9} 49r25 51r30
+54V13 Lire_16{16|83M9} 54b13 54>22 60l8 60t15 109r27 521s50 523s35 539s59
+. 543s47 599s49 603s37 607s50 611s38
+54m22 A{16|83M9} 57r25 59r31
+62V13 Lire_32{16|83M9} 62b13 62>22 68l8 68t15 109r36 526s50 528s35 540s59
+. 544s47 600s49 604s37 608s50 612s38 21|17s59 18s59
+62m22 A{16|83M9} 65r25 67r31
+70V13 Lire_64{16|83M9} 70b13 70>22 76l8 76t15 109r45 478s15 530s35 541s47
+. 601s44 609s46 861s23 914s21 915s30 916s23 917s23 918s21 923s21 928s34 930s23
+. 931s27 21|16s38 38s44 101s34 116s32
+70m22 A{16|83M9} 73r25 75r31
+78U14 Ecrire_8 78b14 78>24 78>41 84l8 84t16 109r54 506s13 615s41 620s42 965s19
+. 21|76s13 110s16
+78m24 A{16|83M9} 81r25 83r25
+78m41 V{16|83M9} 83r28
+86U14 Ecrire_16 86b14 86>25 86>42 92l8 92t17 109r64 616s41 621s42
+86m25 A{16|83M9} 89r25 91r26
+86m42 V{16|83M9} 91r29
+94U14 Ecrire_32 94b14 94>25 94>42 100l8 100t17 109r75 617s41 622s42 21|118s10
+94m25 A{16|83M9} 97r25 99r26
+94m42 V{16|83M9} 99r29
+102U14 Ecrire_64 102b14 102>25 102>42 108l8 108t17 109r86 379s7 618s49 623s51
+. 837s16 901s16 902s16 903s16 904s16 905s16 907s19 915s16 21|92s10 93s10
+102m25 A{16|83M9} 105r25 107r26
+102m42 V{16|83M9} 107r29
+113U14 Empiler 113b14 113>23 126l8 126t15 157r19 580s16 585s16 589s16 593s16
+. 595s16 598s28 599s28 600s28 601s35 602s28 603s28 604s28 606s29 607s29 608s29
+. 609s37 610s29 611s29 612s29 719s16 734s16 819s19 873s16 891s16 979s16 1015s19
+113m23 V{16|83M9} 119r25
+128V13 Depiler{16|83M9} 128b13 140l8 140t15 157r28 445s20 465s18 489s17 490s17
+. 494s17 578s21 615s32 616s32 617s32 618s40 620s33 621s33 622s33 623s42 626s33
+. 627s33 628s33 631s21 634s21 637s21 650s33 651s33 654s33 656s34 674s24 675s24
+. 683s24 684s24 701s24 702s24 707s21 715s34 716s34 717s22 721s21 722s34 723s21
+. 738s32 750s34 769s34 781s32 797s21 808s21 853s33 868s21 882s32 938s21 939s21
+. 943s21 955s21 959s21 969s21 970s21 971s21 982s47 983s40 984s48 985s40 1048s26
+. 21|90s15 97s15 100s15 104s15 115s15 117s15 121s15 125s15 129s15 130s15
+. 134s15 138s15 142s15 143s15 144s15 148s15 149s15 150s15 154s15 158s15
+129m7 V{16|83M9} 134m7 139r14
+142V13 Sommet{16|83M9} 142b13 148l8 148t14 157r37 580s25 626s60 627s60 628s60
+. 629s50 632s46 635s47 638s58 640s31 645s50 647s21 650s60 651s60 652s46 653s46
+. 654s60 657s34 680s47 689s34 710s35 739s32 747s47 748s47 751s32 761s71 763s55
+. 765s55 770s34 782s32 1028s34
+150U14 Remplacer_Sommet 150b14 150>32 156l8 156t24 157r45 626s42 627s42 628s42
+. 629s28 632s16 635s16 638s16 641s19 645s28 649s16 650s42 651s42 652s28 653s28
+. 654s42 664s19 666s19 668s19 680s16 698s16 710s16 746s16 747s29 748s29 759s16
+. 761s16 763s16 765s16 779s16 791s16 21|122s10 126s10 131s10 135s10 139s10
+. 145s10 151s10 155s10 159s10
+150m32 V{16|83M9} 155r25
+161U14 Empiler_Retour 161b14 161>30 172l8 172t22 805s16 809s16
+161m30 A{16|83M9} 167r24
+174V13 Depiler_Retour{16|83M9} 174b13 181l8 181t22 813s27
+185U14 Verifier_Niveau 185b14 190l8 190t23 191r19 447s10 468s13 817s16 851s16
+. 898s16 1020s16
+193V13 Booleen{16|83M9} 193b13 193>22 200l8 200t15 225r19 772s39 773s39 774s39
+. 775s39 776s39 777s39 784s40 785s40 786s40 787s40 788s40 789s40 979s25
+193b22 B{boolean} 195r10
+202V13 Etendre_8{16|83M9} 202b13 202>24 208l8 208t17 225r28 516s38 538s47
+. 598s37 606s38
+202m24 V{16|83M9} 204r10 205r17 207r14
+210V13 Etendre_16{16|83M9} 210b13 210>25 216l8 216t18 225r39 521s38 539s47
+. 599s37 607s38
+210m25 V{16|83M9} 212r10 213r17 215r14
+218V13 Etendre_32{16|83M9} 218b13 218>25 224l8 224t18 225r51 526s38 540s47
+. 600s37 608s38 21|17s47 18s47
+218m25 V{16|83M9} 220r10 221r17 223r14
+227V13 Arrondi_8{16|83M9} 227b13 227>24 230l8 230t17 822s19 825s29 842s57
+. 874s29 882s21
+227m24 N{16|83M9} 229r50
+232V13 Masque{16|83M9} 232b13 232>21 243l8 243t14 680s80 709s21
+232m21 Largeur{16|83M9} 234r10 234r25 237r10 239r13 242r38
+245V13 Compte_Decalage{natural} 245b13 245>30 251l8 251t23 632s54 635s55
+. 638s66 680s55 689s42 708s34
+245m30 N{16|83M9} 247r10 250r23
+253V13 Abs_Mot{16|83M9} 253b13 253>22 259l8 259t15 315s16 315s29 316s27 727s19
+253i22 S{24|7I9} 255r10 256r31 258r24
+262U14 Mul_128 262b14 262>23 262>26 262<43 262<49 276l8 276t15 315s7
+262m23 X{16|83M9} 263r36 264r49
+262m26 Y{16|83M9} 265r36 266r49
+262m43 Haut{16|83M9} 275m7
+262m49 Bas{16|83M9} 274m7
+263m7 X0{16|83M9} 267r37 268r37
+264m7 X1{16|83M9} 269r37 270r37
+265m7 Y0{16|83M9} 267r42 269r42
+266m7 Y1{16|83M9} 268r42 270r42
+267m7 P00{16|83M9} 272r22 274r16
+268m7 P01{16|83M9} 272r34 275r34
+269m7 P10{16|83M9} 272r56 275r58
+270m7 P11{16|83M9} 275r15
+271m7 Milieu{16|83M9} 274r50 275r82
+279U14 Div_128 279b14 279>23 279>29 279>34 280<23 280<31 280<38 304l8 304t15
+. 316s7
+279m23 Haut{16|83M9} 286r33
+279m29 Bas{16|83M9} 288r33
+279m34 D{16|83M9} 292r34 293r22
+280m23 Q_Haut{16|83M9} 301m7
+280m31 Q_Bas{16|83M9} 302m7
+280m38 Reste{16|83M9} 303m7
+281m7 R{16|83M9} 290r22 291m10 291r27 292r29 293m13 293r18 303r16
+281m10 QH{16|83M9} 295m16 295r22 301r17
+281m14 QL{16|83M9} 297m16 297r22 302r16
+281m18 Bit{16|83M9} 286m13 288m13 291r36
+282b7 Retenue{boolean} 290m10 292r13
+284i11 I{integer} 285r13 286r39 288r38 294r16 295r43 297r43
+307U14 Mul_Div 307b14 307>23 307>26 307>29 307<40 307<43 330l8 330t15 718s16
+. 724s16
+307i23 A{24|7I9} 308r40 315r25
+307i26 B{24|7I9} 308r51 315r38
+307i29 C{24|7I9} 309r53 312r10 316r36
+307i40 Q{24|7I9} 321m10 323m10
+307i43 R{24|7I9} 326m10 328m10
+308b7 Negatif_P{boolean} 309r39 325r10
+309b7 Negatif_Q{boolean} 317r67 320r10
+310m7 Haut{16|83M9} 315m42 316r16
+310m13 Bas{16|83M9} 315m48 316r22
+310m18 QH{16|83M9} 316m40 317r10
+310m22 QL{16|83M9} 316m44 317r26 317r47 321r31 323r27
+310m26 Reste{16|83M9} 316m48 326r31 328r27
+335V13 Tronquer{16|83M9} 335b13 335>23 348l8 348t16 763s34
+335f23 F{long_float} 338r15 338r34 341r19 342r10 342r45 344r13 344r47
+336i7 T{24|7I9} 341m7 342r40 343m10 343r15 344r42 345m10 345r15 347r24
+350V13 Arrondir{16|83M9} 350b13 350>23 356l8 356t16 765s34
+350f23 F{long_float} 352r15 352r39 355r31
+360U14 Trap 360>20 360>39 1050s16 21|5b11 164l5 164t9
+360i20 Service{integer} 21|5b17 83r9 162r60
+360m39 Code{16|83M9} 21|5b36 86r45
+427i7 Op{integer} 551m35 554m35 558r24 568r33 574r15 663r19 665r22 673r19
+. 682r19 700r19 740r21 771r21 783r21 801r31 854r19 953r32 1021r19 1022r24
+. 1025r24 1053r68 1057r26
+427i11 Lvl{integer} 438r27 440r13 447r27 450r36 452r26 459r27 461r13 468r30
+. 469r27 472r39 515r19 520r19 525r19 551m39 554m39 568r37 817r33 818r19 819r37
+. 820r28 840r35 842r42 842r52 844r19 845r40 848r19 851r33 852r32 853r25 898r33
+. 900r30 905r48 906r30 1020r33
+427i16 Poids{integer} 551m64 552r41
+428m7 Ofs{16|83M9} 478r35 513r24 551m44 554m44 568r42 677r24 686r24 704r24
+. 986r62 1048m19 1050r37
+428m12 Val{16|83M9} 478r28 551m49 554m49 568r47 589r25 593r34 598r67 599r67
+. 600r67 601r62 602r55 603r55 604r55 615r61 616r61 617r61 618r69 678r24 687r24
+. 705r24 795r27 802r30 806r27 812r29 822r30 825r40 842r68 900r37 913r35 1023r33
+. 1038r19 1039r76 1042r44 1047r32 1050r31
+428m17 Suivant{16|83M9} 572m10 795m16 802m19 805r32 806m16 809r32 810m16
+. 813m16 931m16 1033m19 1057r34 1060r38 1063r16
+428m26 Sequentiel{16|83M9} 570m10 572r21 1057r43
+428m38 Longueur{16|83M9} 551m54 555m13 568r56 570r29 571r42
+429m7 A{16|83M9} 647m16 648r45 649r35 709m16 710r62 711r55 726m16 727r34
+. 808m16 810r27 900m16 901r27 902r27 903r27 904r27 905r27 907r30 913m16 914r30
+. 915r27 938m16 948r34 951r27 959m16 965r29 965r44 971m16 976r34 979r41 1023m19
+. 1026m19 1029r31 1029r57
+429m10 B{16|83M9} 626m28 626r71 627m28 627r70 628m28 628r71 631m16 632r71
+. 634m16 635r72 637m16 638r83 650m28 650r69 651m28 651r69 654m28 654r69 721m16
+. 724r57 726r34 726r43 914m16 915r39 916r32 917r32 918r30 923r30 928r43 930r32
+. 931r36 943m16 949r34 951r24 963m16 964r22 965r33 965r48 966m19 966r24 969m16
+. 977r34 979r44
+429m13 V{16|83M9} 578m16 615m27 615r66 616m27 616r66 617m27 617r66 618m35
+. 618r74 620m28 620r64 621m28 621r64 622m28 622r64 623m37 623r73 648m16 649r41
+. 649r46 689m16 692m19 696m19 696r60 698r34 707m16 711r49 717m16 718r37 723m16
+. 724r37 772m34 773m34 774m34 775m34 776m34 777m34 779r34 784m35 785m35 786m35
+. 787m35 788m35 789m35 791r34 797m16 798r19 799r53 801r20 918m16 919r19 922r32
+429m16 W{16|83M9} 674m19 677m19 680r88 683m19 686m19 690r19 693r22 696r77
+. 696r96 701m19 704m19 709r29
+429m19 L{16|83M9} 675m19 678m19 680r72 684m19 687m19 689r59 702m19 705m19
+. 708r51
+429m22 N{16|83M9} 708m16 710r74 711r67 868m16 874r40 882m16 887r19 890r27
+. 923m16 924r19 924r28 927r39 939m16 944r31 948r37 949r37 951r30 955m16 960r31
+. 964r26 970m16 972r31 976r37 977r37 979r47
+430i7 SA{24|7I9} 657m16 660r22 664r47 666r47 668r47 716m16 718r41 722m16
+. 724r41 770m16 772r48 773r48 774r48 775r48 776r48 777r48 1028m16 1029r19
+. 1029r45
+430i11 SB{24|7I9} 656m16 658r19 660r43 664r52 666r54 668r54 715m16 718r45
+. 750m16 753r34 756r19 769m16 772r53 773r54 774r53 775r54 776r53 777r54
+430i15 Q{24|7I9} 718m49 719r35 724m61 729m22 729r27 731m22 731r27 734r35
+430i18 R{24|7I9} 718m52 724m64 727r28 728r22
+431f7 F{long_float} 739m16 741m35 741r40 742m35 742r40 743m35 743r40 744m35
+. 744r40 746r47 751m16 754r28 782m16 784r49 785r49 786r49 787r49 788r49 789r49
+431f10 G{long_float} 738m16 741r44 742r44 743r44 744r44 752m16 754m19 754r24
+. 757m19 757r30 759r47 781m16 784r53 785r54 786r53 787r54 788r53 789r54
+432i7 K{integer} 1022m19 1025m19 1029r34 1029r72 1029r76
+433a7 Taille_De(16|83M9) 1029r61
+435V16 Base_B{16|83M9} 435b16 453l11 453t17 593s25 598s58 599s58 600s58 601s53
+. 602s46 603s46 604s46 615s52 616s52 617s52 618s60 1023s24
+455V16 Adresse_C{16|83M9} 455b16 484l11 484t20 595s25 606s59 607s59 608s59
+. 609s55 610s47 611s47 612s47 620s53 621s53 622s53 623s62 1026s24
+456m10 P{16|83M9} 465m13 469m13 478m10 478r24 483r17
+486U17 Operation_Bloc 486b17 486>33 509l11 509t25 953s16
+486i33 Genre{integer} 501r18
+487m10 Src{16|83M9} 489m10 500r26
+487m15 Lg{16|83M9} 490m10 495r25 499r20
+487m19 Dst{16|83M9} 494m10 502r53 503r52 504r53 506r23
+487m24 K{16|83M9} 498m10 499r16 500r32 502r59 503r58 504r59 506r29 507m13
+. 507r18
+487m27 X{16|83M9} 500m13 502m34 502r39 503m34 503r39 504m34 504r39 506r32
+511V16 Composant{24|7I9} 511b16 511>27 532l11 532t20 992s28 993s28
+511m27 Adr{16|83M9} 516r57 518r43 521r59 523r44 526r59 528r44 530r44
+535V16 Borne{24|7I9} 535b16 535>23 535>42 546l11 546t16 1029s24 1029s50
+535m23 Adr{16|83M9} 538r66 539r68 540r68 541r56 542r55 543r56 544r56
+535i42 K{integer} 537r15
+753i20 K<long_integer>
+906i20 I{integer} 907r56 907r69
+927i20 I{integer} 928r28 928r69
+982i19 Lg_D{24|7I9} 991r38 1006m22 1006r30 1009r32 1011r35
+983m19 AD{16|83M9} 993r39 1004m22 1004r28
+984i19 Lg_G{24|7I9} 991r25 1005m22 1005r30 1009r25 1011r28
+985m19 AG{16|83M9} 992r39 1003m22 1003r28
+986i19 Pas{24|7I9} 1003r46 1004r46 1005r37 1006r37
+987i19 CG{24|7I9} 992m22 994r25 995r28
+987i23 CD{24|7I9} 993m22 994r31 995r33
+988i19 Res{24|7I9} 996m28 998m28 1010m25 1012m25 1015r38
+989b19 Decide{boolean} 1000m25 1008r26
+X 21 machine-trap.adb
+7N4 Taille_Max 25r15
+9m4 A{16|83M9} 90m10 92r21 93r21 97m10 100m10 101r43 101r57 104m10 110r26
+. 115m10 116r41 116r55 121m10 122r58 125m10 126r59 129m10 131r68 134m10 135r65
+. 138m10 139r63 142m10 145r66 148m10 151r64 154m10 155r63 158m10 159r61
+9m7 B{16|83M9} 117m10 118r21 130m10 131r84 143m10 145r70 149m10 151r68
+9m10 C{16|83M9} 144m10 145r85 150m10 151r83
+10i4 R{24|7I9} 96m10 101m10 108m36 109r16 116m10 118r34
+10i7 S{24|7I9} 91m24 92r34
+10i10 N{24|7I9} 91m27 93r38
+15V13 Longueur{24|7I9} 15b13 15>23 21l8 21t16 31s21 101s47 116s45
+15m23 Doublet{16|83M9} 16r47
+16m7 Info{16|83M9} 17r68 18r68
+17i7 Dernier{24|7I9} 20r14
+18i7 Premier{24|7I9} 20r28
+23U14 Verifier 23b14 23>24 28l8 28t16 36s7 53s7 70s7
+23i24 Lg{24|7I9} 25r10
+30V13 Chaine{string} 30b13 30>21 46l8 46t14 122s50 126s51 159s53
+30m21 Doublet{16|83M9} 31r31 38r53
+31i7 Lg{24|7I9} 33r10 34m10 36r17 39r36
+38m10 Donnees{16|83M9} 42r45
+39a10 S{string} 41r19 42m13 44r17
+41i14 I{integer} 42r16 42r68
+48V13 Ecrire_Memoire{24|7I9} 48b13 48>29 48>41 48>60 62l8 62t22 96s15 101s15
+. 145s38
+48i29 Fd{24|7I9} 60r30
+48m41 Adr{16|83M9} 58r42
+48i60 Lg{24|7I9} 50r10 53r17 55r41
+55a10 T{15|12A9} 57r19 58m13 60r34
+57i14 I{integer} 58r16 58r61
+64V13 Lire_Memoire{24|7I9} 64b13 64>27 64>39 64>58 80l8 80t20 116s15 151s38
+64i27 Fd{24|7I9} 74r21
+64m39 Adr{16|83M9} 76r23
+64i58 Lg{24|7I9} 67r10 70r17 72r41
+65i7 Lus{24|7I9} 74m28 75r33 78r17
+72a10 T{15|12A9} 74m25 74r25 76r59
+75i14 I{integer} 76r42 76r62
+106a13 T{15|12A9} 108m33 108r33 110r42
+X 22 memoire.ads
+7K9*Memoire 20|1w6 1r19 51r14 59r14 67r14 75r14 83r7 91r7 99r7 107r7 22|63e12
+9X4*Faute 20|1067r12
+10U14*Signaler 20|116s10 132s10 164s10 177s10 188s10 313s10 318s10 496s13
+. 565s13 659s19 661s19 823s19 830s19 849s19 876s19 888s19 920s19 925s19 945s19
+. 961s19 973s19 1031s22 1039s19 1053s16 21|26s10 162s10
+14N4*Entree 20|371r13
+15N4*Base_Pile 20|131r17 368r24 372r14 377r22 1065r43 1068r46
+16N4*Base_Tas 20|368r71 887r28
+17N4*Taille_Enregistrement 20|555r25
+20V13*Format_HX{boolean} 20|387s19
+26V13*Debut_Copile{16|83M9} 20|368s45 378s14 875s45 878s25 879s53
+27V13*Fin_Copile{16|83M9} 20|368s59 829s26 875s25
+28V13*Fin_Pile{16|83M9} 20|368s35 373s22 822s38
+29V13*Fin_Tas{16|83M9} 20|368s81 382s13 892s19 893s44
+30V13*Vecteur_CE{16|83M9} 20|374s14
+35V13*Lire_8{16|83M9} 20|51s22
+36V13*Lire_16{16|83M9} 20|59s22
+37V13*Lire_32{16|83M9} 20|67s22
+38V13*Lire_64{16|83M9} 20|75s22
+39U14*Ecrire_8 20|83s15
+40U14*Ecrire_16 20|91s15
+41U14*Ecrire_32 20|99s15
+42U14*Ecrire_64 20|107s15
+45U14*Copier 20|951s16
+46V13*Egaux{boolean} 20|979s34
+49V13*Lire_Pile{16|83M9} 20|134s12 147s14 585s25
+50U14*Ecrire_Pile 20|119s7 155s7
+53U14*Lire_Instruction 20|554s13
+X 24 mots.ads
+5K9*Mots 19|4w6 4r16 24|20e9
+7I9*Signe<long_integer> 19|7r56 13r43 14r38 15r31 20|27r19 28r19 29r19 30r19
+. 253r26 307r33 307r51 336r11 341r12 355r24 364r56 409r43 414r38 419r31 430r22
+. 511r53 535r62 552r34 571r35 660r27 982r26 984r27 986r34 986r43 987r28 988r25
+. 21|10r14 15r53 17r26 18r26 23r29 31r12 48r34 48r65 48r79 64r32 64r63 64r77
+. 65r13
+9V13*Vers_Signe[44|20]{7I9} 20|321s15 323s15 326s15 328s15 495s13 516s26
+. 518s23 521s26 523s23 526s26 528s23 530s23 538s35 539s35 540s35 541s35 542s35
+. 543s35 544s35 640s19 656s22 657s22 715s22 716s22 718s25 722s22 724s25 724s45
+. 750s22 761s59 769s22 770s22 944s19 960s19 972s19 982s35 984s36 986s50 1028s22
+. 1039s64 21|17s35 18s35 86s33 131s56 131s72 135s53 139s51 145s54 145s73
+. 151s52 151s71 155s51
+10V13*Vers_Mot[44|20]{16|83M9} 20|256s21 258s14 347s14 355s14 664s37 666s37
+. 668s37 719s25 734s25 1015s28 21|92s24 93s28 118s24 122s28 126s28 131s28
+. 135s28 139s28 145s28 151s28 155s28 159s28
+11V13*Vers_Reel[44|20]{long_float} 20|738s21 739s21 751s21 763s44 765s44
+. 781s21 782s21
+12V13*Depuis_Reel[44|20]{16|83M9} 20|746s34 759s34 761s34
+14m4*Bit_63{16|83M9} 20|40r39 290r28 317r31 317r52 747r58 748r62
+17V13*Image{string} 20|1039s57
+18V13*Image{string} 20|188s59 1053s61 21|162s53
+X 25 profil.ads
+6K9*Profil 20|3w6 169r16 170r10 235r10 248r10 438r13 459r13 568r13 691r19
+. 694r19 799r19 844r25 845r19 878r40 879r19 892r34 893r19 1042r19 1065r7
+. 1068r10 25|35e11
+10U14*Instruction 20|568s20
+13U14*Acces 20|438s20 459s20
+14U14*Service 20|1042s26
+15U14*Booleen_Non_Normalise 20|799s26
+16U14*Decalage_Hors_Mot 20|248s17
+17U14*Champ_Limite 20|235s17 691s26 694s26
+20m4*Max_Pile_Octets{16|83M9} 20|1065m14 1068m17
+21i4*Max_Retours{natural} 20|169r23 170m17
+22m4*Max_Copile_Octets{16|83M9} 20|878r47 879m26
+23m4*Max_Tas_Octets{16|83M9} 20|892r41 893m26
+24i4*Max_Niveau{integer} 20|844r32 845m26
+X 43 tx_codes.ads
+3K9*TX_Codes 20|2w6 2r20 43|168e13
+5N4*OP_DROP 20|577r18
+6N4*OP_DUP 20|579r18
+7N4*OP_OVER 20|581r18
+8N4*OP_LI 20|588r18
+9N4*OP_LIF 20|588r26
+10N4*OP_LCA 20|588r35
+11N4*OP_LSPA 20|588r44
+12N4*OP_LVA 20|592r18
+13N4*OP_LIVA 20|594r18
+14N4*OP_LB 20|598r18
+15N4*OP_LW 20|599r18
+16N4*OP_LD 20|600r18
+17N4*OP_LQ 20|601r18
+18N4*OP_LA 20|601r26
+19N4*OP_ULB 20|602r18
+20N4*OP_ULW 20|603r18
+21N4*OP_ULD 20|604r18
+22N4*OP_LIB 20|606r18
+23N4*OP_LIW 20|607r18
+24N4*OP_LID 20|608r18
+25N4*OP_LIQ 20|609r18
+26N4*OP_LIA 20|609r27
+27N4*OP_ULIB 20|610r18
+28N4*OP_ULIW 20|611r18
+29N4*OP_ULID 20|612r18
+30N4*OP_SB 20|615r18
+31N4*OP_SW 20|616r18
+32N4*OP_SD 20|617r18
+33N4*OP_SQ 20|618r18
+34N4*OP_SA 20|618r26
+35N4*OP_SIB 20|620r18
+36N4*OP_SIW 20|621r18
+37N4*OP_SID 20|622r18
+38N4*OP_SIQ 20|623r18
+39N4*OP_SIA 20|623r27
+40N4*OP_ET 20|626r18
+41N4*OP_OU 20|627r18
+42N4*OP_OUX 20|628r18
+43N4*OP_NON 20|629r18
+44N4*OP_SHL 20|630r18
+45N4*OP_SHR 20|633r18
+46N4*OP_SAR 20|636r18
+47N4*OP_CLAMP0 20|639r18
+48N4*OP_NEG 20|645r18
+49N4*OP_ABS 20|646r18
+50N4*OP_ADD 20|650r18
+51N4*OP_SUB 20|651r18
+52N4*OP_INC 20|652r18
+53N4*OP_DEC 20|653r18
+54N4*OP_MUL 20|654r18
+55N4*OP_DIV 20|655r18 663r24
+56N4*OP_REMI 20|655r27 665r27
+57N4*OP_MODI 20|655r37
+58N4*OP_UBFX 20|672r18 673r24
+59N4*OP_SBFX 20|681r18 682r24
+60N4*OP_BFI 20|699r18 700r24
+61N4*OP_CVTIX 20|714r18
+62N4*OP_CVTXI 20|720r18
+63N4*OP_FADD 20|737r18 741r24
+64N4*OP_FSUB 20|737r28 742r24
+65N4*OP_FMUL 20|737r38 743r24
+66N4*OP_FDIV 20|737r48
+67N4*OP_FNEG 20|747r18
+68N4*OP_FABS 20|748r18
+69N4*OP_FEXP 20|749r18
+70N4*OP_CVTIF 20|760r18
+71N4*OP_CVTFI 20|762r18
+72N4*OP_CVTFIR 20|764r18
+73N4*OP_CEQ 20|768r18 772r24
+74N4*OP_CNE 20|768r27 773r24
+75N4*OP_CGT 20|768r36 774r24
+76N4*OP_CGE 20|768r45 775r24
+77N4*OP_CLT 20|768r54 776r24
+78N4*OP_CLE 20|768r63
+79N4*OP_FCEQ 20|780r18 784r24
+80N4*OP_FCNE 20|780r28 785r24
+81N4*OP_FCGT 20|780r38 786r24
+82N4*OP_FCGE 20|780r48 787r24
+83N4*OP_FCLT 20|780r58 788r24
+84N4*OP_FCLE 20|780r68
+85N4*OP_BRA 20|794r18
+86N4*OP_BT 20|796r18 801r36
+87N4*OP_BF 20|796r26
+88N4*OP_CALL 20|804r18
+89N4*OP_CALLI 20|807r18
+90N4*OP_RTD 20|811r18
+91N4*OP_LINK 20|816r18
+92N4*OP_UNLINK 20|847r18
+93N4*OP_UNLINKR 20|847r30 854r24
+94N4*OP_CO_VAR 20|867r18
+95N4*OP_HEAP_ALLOC 20|881r18
+96N4*OP_EXC_MACH 20|897r18
+97N4*OP_EXC_RAISE 20|909r18
+98N4*OP_BLKMOV 20|937r18
+99N4*OP_BLKCMP 20|968r18
+100N4*OP_BLKAND 20|502r21 952r18
+101N4*OP_BLKOU 20|503r21 952r30
+102N4*OP_BLKOUX 20|952r41
+103N4*OP_BLKNOT 20|954r18
+104N4*OP_LEXCMP 20|980r18
+105N4*OP_TRAP 20|1037r18
+106N4*OP_CHKB 20|1019r18 1022r29
+112N4*OP_CHKUD 20|1021r25
+113N4*OP_CHKIB 20|1025r29
+119N4*OP_CHKUID 20|1019r29
+120N4*OP_UBFXI 20|672r28
+121N4*OP_SBFXI 20|681r28
+122N4*OP_BFII 20|699r27
+151N4*SYS_EXIT 20|1047r38 21|85r12
+152N4*SYS_CLOCK_GETTIME 21|89r12
+153N4*SYS_PUT_CHAR 21|95r12
+154N4*SYS_PUT_STR 21|99r12
+155N4*SYS_GET_CHAR 21|103r12
+156N4*SYS_GET_STR 21|114r12
+157N4*SYS_FILE_CREATE 21|120r12
+158N4*SYS_FILE_OPEN 21|124r12
+159N4*SYS_FILE_SET_POS 21|128r12
+160N4*SYS_FILE_GET_POS 21|133r12
+161N4*SYS_FILE_GET_SIZE 21|137r12
+162N4*SYS_FILE_WRITE 21|141r12
+163N4*SYS_FILE_READ 21|147r12
+164N4*SYS_FILE_CLOSE 21|153r12
+165N4*SYS_FILE_DELETE 21|157r12
+166N4*Dernier_Service 20|1038r25
+

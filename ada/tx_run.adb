@@ -1,6 +1,10 @@
---  TX_RUN : interprete des images TX produites par fasmg avec codi_TX.finc.
+--  TX_RUN : interprete des images TX (codi_TX.finc) et HX (codi_HX.finc) produites par fasmg.
 --
---    tx_run [-p rapport] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image.tx
+--    tx_run [-p rapport] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image
+--
+--  Le format est reconnu a la signature de l'en-tete (TLALOCTX ou TLALOCHX). Une image HX
+--  est decodee par Decodeur_HX puis executee avec la meme semantique ; son rapport ajoute
+--  le compte des instructions LLIR representees (table des instructions et ses drapeaux).
 --
 --  -p rapport   ecrit le profil dynamique dans le fichier rapport ("-" : sortie d'erreur)
 --  -l           etude de limites du parallelisme dans le rapport
@@ -17,6 +21,7 @@ with Profil;
 with Hote;
 with Frontal;
 with TX_Codes;
+with Decodeur_HX;
 procedure TX_Run is
 
    Mio : constant := 1024 * 1024;
@@ -36,7 +41,7 @@ procedure TX_Run is
    procedure Usage is
    begin
       Text_IO.Put_Line (Text_IO.Standard_Error,
-        "usage : tx_run [-p rapport] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image.tx");
+        "usage : tx_run [-p rapport] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image");
       Args.Code_De_Sortie (2);
    end Usage;
 
@@ -54,6 +59,10 @@ procedure TX_Run is
    procedure Rapport_Final is
    begin
       if Avec_Profil then
+         if Memoire.Format_HX then
+            Profil.Instructions_LLIR := Profil.Compteur (Machine.Instructions_LLIR);
+            Profil.Octets_HX := Profil.Compteur (Machine.Octets_Lus);
+         end if;
          if Nom_Rapport (1 .. Lg_Rapport) = "-" then
             Profil.Rapport ("");
          else
@@ -112,6 +121,13 @@ begin
       Memoire.Charger_Image (Nom_Image (1 .. Lg_Image), Copile * Mio);
       Memoire.Creer_Pile (Pile * Mio);
       Memoire.Creer_Tas (Tas * Mio);
+      if Memoire.Format_HX then
+         Profil.Image_HX := True;
+         Decodeur_HX.Preparer;
+         if Avec_Frontal then
+            Memoire.Signaler ("-f modele la disposition HX a partir d'une image TX ; il n'accepte pas d'image HX");
+         end if;
+      end if;
       if Avec_Frontal then
          Frontal.Preparer;
          Frontal.Actif := True;

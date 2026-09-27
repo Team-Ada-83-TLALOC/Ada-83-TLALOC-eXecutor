@@ -4,6 +4,7 @@ with Profil;
 with Hote;
 with Limites;
 with Frontal;
+with Decodeur_HX;
 package body Machine is
 
    Nb_Niveaux  : constant := 15;             -- DISPLAY[0..14]
@@ -25,6 +26,9 @@ package body Machine is
    Classe_Courante : Limites.Classe_Acces := Limites.Indirecte;   -- acces explicite en cours
    Limite_Instr : Signe := 0;
    Nb_Executees : Signe := 0;
+   Nb_LLIR      : Signe := 0;                -- instructions LLIR representees (HX : poids)
+   Nb_Octets    : Signe := 0;                -- octets de code lus
+   Image_HX     : Boolean := False;          -- image HX : decodage par Decodeur_HX
    Code_Final   : Integer := 0;
    Fini         : Boolean := False;
    Op_Courant   : Integer := 0;
@@ -361,6 +365,7 @@ package body Machine is
    begin
       Avec_Limites := Mesurer_Limites;
       Limites.Actif := Mesurer_Limites;
+      Limites.Regions (Base_Pile, Fin_Pile, Debut_Copile, Fin_Copile, Base_Tas, Fin_Tas);
       Avec_Profil := Profiler;
       Limite_Instr := Limite;
       PC := Entree;
@@ -377,6 +382,12 @@ package body Machine is
       HP := Fin_Tas;
       RSP := 0;
       Nb_Executees := 0;
+      Nb_LLIR := 0;
+      Nb_Octets := 0;
+      Image_HX := Format_HX;
+      if Image_HX then
+         Limites.Decalage_PC := 0;
+      end if;
       Fini := False;
    end Initialiser;
 
@@ -400,11 +411,21 @@ package body Machine is
       return Nb_Executees;
    end Instructions_Executees;
 
+   function Instructions_LLIR return Signe is
+   begin
+      return Nb_LLIR;
+   end Instructions_LLIR;
+
+   function Octets_Lus return Signe is
+   begin
+      return Nb_Octets;
+   end Octets_Lus;
+
    ---------------------------------------------------------------- boucle d'execution
 
    procedure Executer is
-      Op, Lvl : Integer;
-      Ofs, Val, Suivant : Unsigned_64;
+      Op, Lvl, Poids : Integer;
+      Ofs, Val, Suivant, Sequentiel, Longueur : Unsigned_64;
       A, B, V, W, L, N : Unsigned_64;
       SA, SB, Q, R : Signe;
       F, G : Long_Float;
@@ -526,10 +547,17 @@ package body Machine is
 
    begin
       loop
-         Lire_Instruction (PC, Op, Lvl, Ofs, Val);
+         if Image_HX then
+            Decodeur_HX.Lire (PC, Op, Lvl, Ofs, Val, Longueur, Poids);
+            Nb_LLIR := Nb_LLIR + Signe (Poids);
+         else
+            Lire_Instruction (PC, Op, Lvl, Ofs, Val);
+            Longueur := Taille_Enregistrement;
+            Nb_LLIR := Nb_LLIR + 1;
+         end if;
          Op_Courant := Op;
          if Avec_Limites then
-            Limites.Debut;
+            Limites.Debut (DSP);
             Classe_Courante := Limites.Indirecte;
          end if;
          Nb_Executees := Nb_Executees + 1;
@@ -537,9 +565,11 @@ package body Machine is
             Signaler ("limite du nombre d'instructions atteinte");
          end if;
          if Avec_Profil then
-            Profil.Instruction (Op, Lvl, Ofs, Val, PC);
+            Profil.Instruction (Op, Lvl, Ofs, Val, PC, Longueur);
          end if;
-         Suivant := PC + Taille_Enregistrement;
+         Sequentiel := PC + Longueur;
+         Nb_Octets := Nb_Octets + Signe (Longueur);
+         Suivant := Sequentiel;
 
          case Op is
 
@@ -809,7 +839,7 @@ package body Machine is
                CSP := CSP + 8;
                Niveau_De (RSP) := Lvl;
                if Avec_Limites then
-                  Limites.Lien (Display (Lvl), PC);          -- frame (FP, procedure)
+                  Limites.Lien (Display (Lvl), PC, Lvl, Arrondi_8 (Val));   -- frame, niveau, locales
                end if;
                if Lvl > Profil.Max_Niveau then
                   Profil.Max_Niveau := Lvl;
@@ -1014,6 +1044,9 @@ package body Machine is
                if Avec_Limites then
                   Limites.Barriere;                         -- appel systeme : serialisant
                end if;
+               if Image_HX and Val = SYS_EXIT then     -- HX : LI code ; TRAP 0
+                  Ofs := Depiler;
+               end if;
                Trap (Integer (Val), Ofs);
 
             when others =>
@@ -1021,7 +1054,7 @@ package body Machine is
          end case;
 
          if Avec_Limites then
-            Limites.Fin (Op, PC, Suivant);
+            Limites.Fin (Op, PC, Suivant, Sequentiel);
          end if;
          if Frontal.Actif then
             Frontal.Instruction (PC, Suivant);

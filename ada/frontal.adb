@@ -16,7 +16,7 @@ package body Frontal is
 
    Nb : Natural := 0;                                -- instructions statiques
    Adr, Val_T : Acc_U64;
-   Op_T, Cible, N_Op, Arg_S, Arg_D : Acc_Ent;        -- N_Op : 1, ou 2 pour un repli
+   Op_T, Cible, N_Op, Arg_S, Arg_D : Acc_Ent;        -- N_Op : instructions HX (1 a 6 pour un repli)
    Pos_S, Pos_O, Pos_A : Acc_Sig;
    Case_De : Acc_Ent;                                -- (PC - Entree) / 16 -> indice
    Total_S, Total_O, Total_A : Signe := 0;
@@ -24,6 +24,7 @@ package body Frontal is
 
    --  statistiques statiques
    Nb_Branches, Nb_Appels, Nb_Replis, Nb_Hors : Natural := 0;
+   Nb_Ofs_Neg, Nb_Chk_Seq : Natural := 0;
    Br_S, Br_D : array (1 .. 4) of Natural := (others => 0);    -- tailles de branches
 
    --  modeles de chargement
@@ -89,10 +90,16 @@ package body Frontal is
       return 8;                                        -- hors format (absent de TLALOC)
    end Taille_B;
 
-   --  complement d'un acces C ; un repli (ofs > 255) ajoute une instruction B24
-   procedure Taille_C (Lvl : Integer; Disp, Ofs : Unsigned_64; Nop, Arg : out Integer) is
+   --  acces C (regles de codi_HX et de LLIR_hardware_support V3) : Nop instructions et Arg
+   --  octets de complement. Hors de ofs = 0..255 (ofs > 255 ou negatif), repli :
+   --    LIVA lvl,disp,0 ; Lx 1111,ofs                               chargement, LIVA
+   --    LIVA lvl,disp,0 ; OVER ; Sx 1111,ofs ; DROP                  rangement, lvl 0..14
+   --    OVER ; LIVA 1111,disp,0 ; OVER ; Sx 1111,ofs ; DROP ; DROP   rangement, lvl = 1111
+   procedure Taille_C (Lvl : Integer; Disp, Ofs : Unsigned_64; Rangement : Boolean;
+                       Nop, Arg : out Integer) is
       D : constant Signe := Vers_Signe (Disp);
       O : constant Signe := Vers_Signe (Ofs);
+      Liva, Acces_B : Integer;
    begin
       Nop := 1;
       if Lvl = -1 and D = 0 and O = 0 then
@@ -101,13 +108,30 @@ package body Frontal is
          Arg := 3;
       elsif O >= 0 and O <= 255 and Tient (D, 20) then
          Arg := 4;
-      elsif Tient (D, 20) and O >= 0 and Tient (O, 20) then
-         Nop := 2;                                      -- LIVA lvl, disp, 0 puis Lx [B24] 1111, ofs
+      elsif Tient (D, 20) and Tient (O, 20) then
          Nb_Replis := Nb_Replis + 1;
-         if Tient (D, 16) then
-            Arg := 3 + 3;
+         if O < 0 then
+            Nb_Ofs_Neg := Nb_Ofs_Neg + 1;
+         end if;
+         if Lvl = -1 and D = 0 then
+            Liva := 0;                                  -- LQ 1111,0
+         elsif Tient (D, 16) then
+            Liva := 3;                                  -- LIVA [C24]
          else
-            Arg := 4 + 3;
+            Liva := 4;                                  -- LIVA [C32]
+         end if;
+         if Tient (O, 12) then
+            Acces_B := 2;                               -- [B16]
+         else
+            Acces_B := 3;                               -- [B24]
+         end if;
+         Arg := Liva + Acces_B;
+         if not Rangement then
+            Nop := 2;
+         elsif Lvl /= -1 then
+            Nop := 4;
+         else
+            Nop := 6;
          end if;
       else
          Nb_Hors := Nb_Hors + 1;
@@ -141,15 +165,34 @@ package body Frontal is
          when OP_CHKB .. OP_CHKUD =>
             A := 3;                                    -- B24
          when OP_CHKIB .. OP_CHKUID =>
-            A := 4;                                    -- C32
+            if Vers_Signe (Ofs) >= 0 and Ofs <= 255 and Tient (Vers_Signe (Val), 20) then
+               A := 4;                                 -- C32
+            else
+               --  sequence de remplacement DUP / LIx / CLT / BT / DUP / LIx / CGT / BT,
+               --  comptee avec deux charges repliees et deux BT supposes en BR16
+               Nb_Chk_Seq := Nb_Chk_Seq + 1;
+               declare
+                  N1, A1 : Integer;
+               begin
+                  Taille_C (Lvl, Val, Ofs, False, N1, A1);
+                  Nop := 6 + 2 * N1;
+                  A := 2 * A1 + 2 * 2;
+               end;
+            end if;
          when OP_LIVA | OP_LIB .. OP_ULID | OP_SIB .. OP_SIA =>
-            Taille_C (Lvl, Val, Ofs, Nop, A);
+            Taille_C (Lvl, Val, Ofs, Op in OP_SIB .. OP_SIA, Nop, A);
          when OP_RTD =>
             if Val /= 0 then
                A := 3;
             end if;
-         when OP_UNLINK | OP_UNLINKR | OP_TRAP =>
+         when OP_UNLINK | OP_UNLINKR =>
             A := 1;
+         when OP_TRAP =>
+            A := 1;
+            if Val = 0 then                            -- SYS_EXIT code : LI code ; TRAP 0
+               Nop := 2;
+               A := 1 + Taille_Imm (Ofs);
+            end if;
          when OP_EXC_RAISE =>
             A := 3;
          when others =>
@@ -415,7 +458,8 @@ package body Frontal is
       Ecrire ("DISPOSITION DU CODE (LLIR_hardware_support) ET CHARGEMENT");
       Ecrire ("  instructions statiques               " & Nombre (Ns)
               & "   dont branches " & Image (Nb_Branches) & ", CALL " & Image (Nb_Appels)
-              & ", replis C " & Image (Nb_Replis) & ", hors format " & Image (Nb_Hors));
+              & ", replis C " & Image (Nb_Replis) & " (ofs negatif " & Image (Nb_Ofs_Neg)
+              & "), CHKI remplaces " & Image (Nb_Chk_Seq) & ", hors format " & Image (Nb_Hors));
       Ecrire ("  taille du code     flux unique       " & Nombre (Total_S) & " octets   "
               & Ratio (Total_S, Ns) & " par instruction");
       Ecrire ("                     double flux       " & Nombre (Total_O + Total_A) & " octets   "

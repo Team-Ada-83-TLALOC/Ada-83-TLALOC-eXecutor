@@ -1,5 +1,0 @@
-	LINK 0, 16
-	LI 5
-	LI 0
-	DIV
-	SYS_EXIT 0

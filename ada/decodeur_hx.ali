@@ -1,0 +1,208 @@
+V "GNAT Lib v13"
+A -O2
+A -gnatn
+A -gnatp
+P SS ZX
+
+RN
+RV NO_ALLOCATORS
+RV NO_DIRECT_BOOLEAN_OPERATORS
+RV NO_LOCAL_ALLOCATORS
+RV NO_SECONDARY_STACK
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_UNCHECKED_CONVERSION
+RV NO_DEFAULT_INITIALIZATION
+RV NO_DYNAMIC_SIZED_OBJECTS
+RV NO_IMPLICIT_LOOPS
+
+U decodeur_hx%b		decodeur_hx.adb		d07176f7 NE OO PK
+W hx_codes%s		hx_codes.ads		hx_codes.ali
+W memoire%s		memoire.adb		memoire.ali
+W mots%s		mots.adb		mots.ali
+Z system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+W tx_codes%s		tx_codes.ads		tx_codes.ali
+W unchecked_conversion%s
+
+U decodeur_hx%s		decodeur_hx.ads		d89175e3 EE NE OO PK
+W interfaces%s		interfac.ads		interfac.ali
+
+D ada.ads		20240521074738 76789da1 ada%s
+D a-direio.ads		20240521074738 a93c9b31 ada.direct_io%s
+D a-except.ads		20240521074738 2a7d8d70 ada.exceptions%s
+D a-ioexce.ads		20240521074738 40018c65 ada.io_exceptions%s
+D a-stream.ads		20240521074738 119b8fb3 ada.streams%s
+D a-string.ads		20240521074738 90ac6797 ada.strings%s
+D a-sttebu.ads		20240521074738 f1ad67a2 ada.strings.text_buffers%s
+D a-stuten.ads		20240521074738 c6ced0ae ada.strings.utf_encoding%s
+D a-tags.ads		20240521074738 9eaa38c6 ada.tags%s
+D a-unccon.ads		20240521074738 0e9b276f ada.unchecked_conversion%s
+D decodeur_hx.ads	20260927112248 cd66ec21 decodeur_hx%s
+D decodeur_hx.adb	20260927112248 aef88cf8 decodeur_hx%b
+D directio.ads		20240521074738 d9b35108 direct_io%s
+D hx_codes.ads		20260927112248 9dd6b244 hx_codes%s
+D interfac.ads		20240521074738 15f799c2 interfaces%s
+D i-cstrea.ads		20240521074738 e53d8b8e interfaces.c_streams%s
+D memoire.ads		20260927112248 a94944b1 memoire%s
+D memoire.adb		20260927112248 fa8c8133 memoire%b
+D mots.ads		20260927112248 80bb1de9 mots%s
+D system.ads		20240521074738 426dafb8 system%s
+D s-crtl.ads		20240521074738 8a0692f8 system.crtl%s
+D s-direio.ads		20240521074738 7c86ede3 system.direct_io%s
+D s-exctab.ads		20240521074738 91bef6ef system.exception_table%s
+D s-ficobl.ads		20240521074738 dc5161d4 system.file_control_block%s
+D s-parame.ads		20251218205951 1f39ba92 system.parameters%s
+D s-putima.ads		20240521074738 17291fe4 system.put_images%s
+D s-secsta.ads		20240521074738 578279f5 system.secondary_stack%s
+D s-soflin.ads		20240521074738 df77073e system.soft_links%s
+D s-stache.ads		20240521074738 0b81c1fe system.stack_checking%s
+D s-stalib.ads		20240521074738 1c9580f6 system.standard_library%s
+D s-stoele.ads		20240521074738 ab5468e4 system.storage_elements%s
+D s-stoele.adb		20240521074738 8f5a9db6 system.storage_elements%b
+D s-traent.ads		20240521074738 c81cbf8c system.traceback_entries%s
+D s-unstyp.ads		20240521074738 fa2a7f59 system.unsigned_types%s
+D tx_codes.ads		20260927112248 cde4632a tx_codes%s
+D unchconv.ads		20240521074738 ca2f9e18 unchecked_conversion%s
+G a e
+G c Z s b [preparer decodeur_hx 22 14 none]
+G c Z s b [lire decodeur_hx 24 14 none]
+G c Z s b [avec_table decodeur_hx 32 13 none]
+G c Z s b [instructions_decodees decodeur_hx 33 13 none]
+G c Z b b [mot_signe decodeur_hx 36 13 none]
+G c Z b b [decodeIP decodeur_hx 9 9 none]
+G c Z b b [tableauIP decodeur_hx 28 9 none]
+G c Z b b [etendre decodeur_hx 39 13 none]
+G c Z b b [niveau decodeur_hx 48 13 none]
+G c Z b b [decoder decodeur_hx 94 14 none]
+G r c none [preparer decodeur_hx 22 14 none] [table_instructions memoire 31 13 none]
+G r c none [preparer decodeur_hx 22 14 none] [fin_code memoire 25 13 none]
+G r c none [preparer decodeur_hx 22 14 none] [nombre_instructions memoire 32 13 none]
+G r c none [preparer decodeur_hx 22 14 none] [lire_32 memoire 37 13 none]
+G r c none [preparer decodeur_hx 22 14 none] [hexa mots 16 13 none]
+G r c none [preparer decodeur_hx 22 14 none] [signaler memoire 10 14 none]
+G r c none [lire decodeur_hx 24 14 none] [hexa mots 16 13 none]
+G r c none [lire decodeur_hx 24 14 none] [signaler memoire 10 14 none]
+G r c none [lire decodeur_hx 24 14 none] [lire_8 memoire 35 13 none]
+G r c none [decoder decodeur_hx 94 14 none] [lire_8 memoire 35 13 none]
+G r c none [decoder decodeur_hx 94 14 none] [hexa mots 16 13 none]
+G r c none [decoder decodeur_hx 94 14 none] [signaler memoire 10 14 none]
+X 11 decodeur_hx.ads
+20K9*Decodeur_HX 35l5 35e16 12|6b14 224l5 224t16
+22U14*Preparer 12|56b14 92l8 92t16
+24U14*Lire 24>20 25<20 26<20 27<20 28<20 29<20 30<20 12|187b14 212l8 212t12
+24m20 PC{15|83M9} 12|187b20 194r35 197r60 200r19
+25i20 Op{integer} 12|188b20 205m10
+26i20 Lvl{integer} 12|189b20 206m10
+27m20 Ofs{15|83M9} 12|190b20 207m10
+28m20 Val{15|83M9} 12|191b20 208m10
+29m20 Longueur{15|83M9} 12|192b20 209m10
+30i20 Poids{integer} 12|193b20 210m10
+32V13*Avec_Table{boolean} 12|214b13 217l8 217t18
+33V13*Instructions_Decodees{natural} 12|219b13 222l8 222t29
+X 12 decodeur_hx.adb
+9R9 Decode 16e14 17r8 28r48 57r22 95r14 203r14
+10m7*Op{15|69M9} 18r7 57m33 179m9 205r27
+11i7*Lvl{15|47I9} 19r7 57m42 180m9 206r28
+12m7*Lg{15|69M9} 20r7 57m52 183m9 199r30 209r37
+13m7*Poids{15|69M9} 21r7 57m61 66m23 85m26 87m26 105r12 210r30
+14i7*Ofs{15|53I9} 22r7 57m73 181m9 207r42
+15m7*Val{15|83M9} 23r7 57m83 182m9 208r19
+26N4 Pas_Une_Instruction 66r32 105r20
+28A9 Tableau(9R9)<integer> 29r33 70r20
+29P9 Acces_Tableau(28A9) 31r17
+31p4 Cache{29P9} 70m7 85r16 87r16 95r29 199r10 203r29
+32m4 Taille{15|83M9} 65m10 68m10 70r43 80r49 111r36 196r15
+33b4 Table_Lue{boolean} 63m7 64r10 71r14 216r14
+34i4 Nb_Decodees{natural} 184m7 184r22 221r14
+36V13 Mot_Signe[36|20]{15|83M9} 207s17
+39V13 Etendre{15|83M9} 39b13 39>22 39>39 46l8 46t15 134s23 141s23 146s20
+. 150s20 153s23 160s20 162s20 167s32 175s47
+39m22 X{15|83M9} 42r11 43r17 45r14
+39i39 Bits{natural} 40r58
+40m7 Signe_Bit{15|83M9} 42r17 43r39
+48V13 Niveau{15|47I9} 48b13 48>21 54l8 54t14 130s20 137s20 144s20 148s20
+48m21 Champ{15|83M9} 50r10 53r25
+57r7 Vide_Initial{9R9} 66m10 70r58
+58m7 Table{15|83M9} 63r20 65r20 75r24
+59m7 W{15|83M9} 75m10 76r29 77r14 84r17
+59m10 A{15|83M9} 76m10 80r16 80r35 81r83 83r27
+60i7 D{natural} 83m13 85r23 87r23
+61i7 Attente{natural} 78m13 78r24 85r47 87r51 89m13
+74i11 K{integer} 75r49
+94U14 Decoder 94b14 94>23 94>41 185l8 185t15 200s10
+94m23 PC{15|83M9} 96r54 106r34 109r98 112r67 115r44 167r23 175r20
+94i41 D{natural} 95r36 111r23
+95r7 E{9R9} 105r10 179r7 180r7 181r7 182r7 183r7
+96i7 Code_Op{natural} 97r54 103r37 109r62 122r41 123r20 128r33
+97r7 T{14|15R9} 98r55 108r10 117r12 121r19 131r16 138r16 152r16 154r19 154r41
+. 166r16 179r27
+98i7 N{natural} 111r31 114r21 175r42 175r63 183r31
+99m7 C{15|83M9} 115m10 115r27 130r41 132r23 134r32 137r41 139r23 141r32 144r41
+. 145r45 146r29 148r41 149r45 150r29 153r32 155r34 157r23 160r29 162r29 164r20
+. 167r41 169r23 172r33 173r32 175r56
+100i7 Lvl{15|47I9} 120m16 124m19 130m13 137m13 144m13 148m13 155m16 180r16
+101i7 Ofs{15|53I9} 122m16 145m13 149m13 173m13 181r16
+102m7 Val{15|83M9} 128m13 132m16 134m16 139m16 141m16 146m13 150m13 153m16
+. 157m16 160m13 162m13 164m13 167m16 169m16 172m13 175m13 182r16
+103i7 Famille{natural} 119r16 119r31
+114i11 K{integer} 115r62
+194m7 D{15|83M9} 196r10 199r26 200r32 203r45
+203r10 E{9R9} 205r25 206r26 207r40 208r17 209r35 210r28
+X 14 hx_codes.ads
+4K9*HX_Codes 12|3w6 3r20 97r38 14|281e13
+6n19*G_Illegal{6E9} 12|108r16 176r15
+6n30*G_Aucun{6E9} 12|118r15
+6n39*G_Imm4{6E9} 12|127r15
+6n47*G_B16{6E9} 12|129r15
+6n54*G_B24{6E9} 12|136r15
+6n61*G_C24{6E9} 12|143r15
+6n68*G_C32{6E9} 12|147r15
+7n19*G_D8{6E9} 12|151r15
+7n25*G_D16{6E9} 12|159r15
+7n32*G_D24{6E9} 12|165r15
+7n39*G_D32{6E9} 12|161r15
+7n46*G_D64{6E9} 12|163r15
+7n53*G_D8_8{6E9} 12|171r15
+7n61*G_BR8{6E9} 12|174r15
+7n68*G_BR16{6E9} 12|174r23
+7n76*G_BR24{6E9} 12|174r32
+7n84*G_BR32{6E9} 12|174r41
+10a4*Longueur_Complement(natural) 12|98r34
+15R9*Description 12|97r23 14|18e14
+16e7*G{6E9} 12|98r57 108r12 117r14
+17i7*Code{integer} 12|121r21 131r18 138r18 152r18 154r21 154r43 166r18 179r29
+20a4*Table(15R9) 12|97r47
+X 15 interfac.ads
+38K9*Interfaces 11|19w6 19r22 15|232e15
+47I9*Integer_8<short_short_integer> 12|11r15 48r49 53r14 100r14 155r23
+53I9*Integer_32<integer> 12|14r15 101r14 122r23 145r20 149r20 173r20
+56I9*Integer_64<long_long_integer> 12|36r52 207r28
+69M9*Unsigned_8 12|10r15 12r15 13r15 85r35 87r35 179r15 183r15
+83M9*Unsigned_64 11|24r31 27r35 28r35 29r35 12|15r15 32r17 36r64 39r26 39r62
+. 40r28 48r29 58r24 59r14 75r32 94r28 99r14 102r14 109r49 111r10 115r49 128r20
+. 175r25 187r31 190r35 191r35 192r35 194r20 209r22
+165V13*Shift_Left{83M9} 12|40s43 43s27 115s15
+170V13*Shift_Right{83M9} 12|130s28 137s28 144s28 145s32 148s28 149s32 172s20
+X 17 memoire.ads
+7K9*Memoire 12|1w6 1r19 17|63e12
+10U14*Signaler 12|81s16 106s10 109s10 112s10 197s10
+13N4*Base_Image 12|76r15
+14N4*Entree 12|65r28 68r31 80r20 80r39 83r31 194r40
+25V13*Fin_Code{15|83M9} 12|68s20
+31V13*Table_Instructions{15|83M9} 12|58s39
+32V13*Nombre_Instructions{natural} 12|74s21
+35V13*Lire_8{15|83M9} 12|96s46 115s36
+37V13*Lire_32{15|83M9} 12|75s15
+X 19 mots.ads
+5K9*Mots 12|2w6 2r16 19|20e9
+16V13*Hexa{string} 12|81s77 106s28 109s43 109s92 112s61 197s54
+X 35 tx_codes.ads
+3K9*TX_Codes 12|4w6 4r20 35|168e13
+8N4*OP_LI 12|152r25
+88N4*OP_CALL 12|166r25
+91N4*OP_LINK 12|131r25 138r25
+92N4*OP_UNLINK 12|154r28
+93N4*OP_UNLINKR 12|154r50
+104N4*OP_LEXCMP 12|121r28
+X 36 unchconv.ads
+20v10*Unchecked_Conversion 12|5w6 36r30
+

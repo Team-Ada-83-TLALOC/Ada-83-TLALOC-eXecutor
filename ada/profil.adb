@@ -35,7 +35,9 @@ package body Profil is
    Paires : array (0 .. Dernier_Code, 0 .. Dernier_Code) of Compteur :=
      (others => (others => 0));
    Op_Precedent : Integer := 0;
-   PC_Precedent : Unsigned_64 := 0;
+   Suivant_Precedent : Unsigned_64 := 0;      -- adresse qui suit l'instruction precedente
+   Suivant_Fenetre   : Unsigned_64 := 0;      -- meme chose pour la fenetre des idiomes
+   Longueur_Courante : Unsigned_64 := 16;
    Nb_Paires    : Compteur := 0;      -- paires adjacentes observees
    Appel_Link   : Compteur := 0;      -- CALL/CALLI dont la cible commence par LINK
 
@@ -137,6 +139,15 @@ package body Profil is
    function Taille_Branche (Cible, PC : Unsigned_64) return Compteur is
       D : Signe := Vers_Signe (Cible - PC - 16) / 16;
    begin
+      if Image_HX then                         -- format reel : BR8, BR16, BR24, BR32
+         case Longueur_Courante is
+            when 2 => BR16 := BR16 + 1;
+            when 3 => BR32 := BR32 + 1;
+            when 4 => BR48 := BR48 + 1;
+            when others => BR64 := BR64 + 1;
+         end case;
+         return Compteur (Longueur_Courante) - 1;
+      end if;
       if D < 0 then
          D := -D;
       end if;
@@ -275,13 +286,14 @@ package body Profil is
       end if;
 
       --  entree dans la fenetre
-      if PC = Prec.PC + 16 then
+      if PC = Suivant_Fenetre then
          if Sequence < 8 then
             Sequence := Sequence + 1;
          end if;
       else
          Sequence := 1;
       end if;
+      Suivant_Fenetre := PC + Longueur_Courante;
       Tete := (Tete + 1) mod 8;
       Fenetre (Tete) := (Op, Lvl, Ofs, Val, PC, T);
       if Op = OP_UBFX or Op = OP_SBFX or Op = OP_BFI then
@@ -352,13 +364,15 @@ package body Profil is
    end Taille_Chk;
 
    procedure Instruction (Op : Integer; Lvl : Integer;
-                          Ofs, Val : Unsigned_64; PC : Unsigned_64) is
+                          Ofs, Val : Unsigned_64; PC : Unsigned_64;
+                          Longueur : Unsigned_64) is
       T : Compteur := 0;
    begin
+      Longueur_Courante := Longueur;
       Nb_Instr := Nb_Instr + 1;
       Par_Code (Op) := Par_Code (Op) + 1;
       if Op_Precedent /= 0 then
-         if PC = PC_Precedent + 16 then
+         if PC = Suivant_Precedent then
             Paires (Op_Precedent, Op) := Paires (Op_Precedent, Op) + 1;
             Nb_Paires := Nb_Paires + 1;
          elsif (Op_Precedent = OP_CALL or Op_Precedent = OP_CALLI)
@@ -367,7 +381,7 @@ package body Profil is
          end if;
       end if;
       Op_Precedent := Op;
-      PC_Precedent := PC;
+      Suivant_Precedent := PC + Longueur;
       case Op is
          when OP_LVA | OP_LB | OP_LW | OP_LD | OP_LQ | OP_LA | OP_ULB | OP_ULW | OP_ULD
             | OP_SB | OP_SW | OP_SD | OP_SQ | OP_SA | OP_LINK | OP_EXC_MACH =>
@@ -395,6 +409,9 @@ package body Profil is
          when others =>
             T := 0;
       end case;
+      if Image_HX then
+         T := Compteur (Longueur) - 1;           -- complement reel de l'instruction HX
+      end if;
       Arg_Par_Code (Op) := Arg_Par_Code (Op) + T;
       Octets_Arg := Octets_Arg + T;
       Observer (Op, Lvl, Ofs, Val, PC, T);
@@ -705,6 +722,13 @@ package body Profil is
       Ecrire ("========================================================================");
       Ecrire ("");
       Ecrire ("instructions executees                : " & Nombre (Nb_Instr));
+      if Image_HX then
+         Ecrire ("image HX (codi_HX) : mesures exactes");
+         Ecrire ("  instructions LLIR representees      : " & Nombre (Instructions_LLIR));
+         Ecrire ("  octets de code HX lus               : " & Nombre (Octets_HX));
+         Ecrire ("  octets HX par instruction HX        : " & Cadre (Ratio (Octets_HX, Nb_Instr), 12));
+         Ecrire ("  (les formats et flux ci-dessous restent les estimations du modele TX)");
+      end if;
       Ecrire ("flux des opcodes       (octets)       : " & Nombre (Nb_Instr));
       Ecrire ("flux des arguments     (octets)       : " & Nombre (Octets_Arg));
       Ecrire ("octets de code lus par instruction    : " & Cadre (Ratio (Nb_Instr + Octets_Arg, Nb_Instr), 12));
@@ -735,11 +759,18 @@ package body Profil is
       Ecrire ("                   imm16              " & Nombre (LI16) & "  " & Pourcent (LI16, Nb_LI));
       Ecrire ("                   imm32              " & Nombre (LI32) & "  " & Pourcent (LI32, Nb_LI));
       Ecrire ("                   imm64              " & Nombre (LI64) & "  " & Pourcent (LI64, Nb_LI));
+      if Image_HX then
+         Ecrire ("  branches (HX)    BR8                " & Nombre (BR16) & "  " & Pourcent (BR16, Nb_BR));
+         Ecrire ("                   BR16               " & Nombre (BR32) & "  " & Pourcent (BR32, Nb_BR));
+         Ecrire ("                   BR24               " & Nombre (BR48) & "  " & Pourcent (BR48, Nb_BR));
+         Ecrire ("                   BR32               " & Nombre (BR64) & "  " & Pourcent (BR64, Nb_BR));
+      else
       Ecrire ("  branches (estim.) BR16              " & Nombre (BR16) & "  " & Pourcent (BR16, Nb_BR));
       Ecrire ("                   BR32               " & Nombre (BR32) & "  " & Pourcent (BR32, Nb_BR));
       Ecrire ("                   BR48               " & Nombre (BR48) & "  " & Pourcent (BR48, Nb_BR));
       Ecrire ("                   BR64               " & Nombre (BR64) & "  " & Pourcent (BR64, Nb_BR));
       Ecrire ("  (branches : ecart ARG estime au double de l'ecart OP)");
+      end if;
       Ecrire ("  controles CHK      B24             " & Nombre (CHK_B24));
       Ecrire ("                     C32             " & Nombre (CHK_C32));
       Ecrire ("                     hors format     " & Nombre (CHK_Hors));

@@ -16,7 +16,8 @@ package Memoire is
    Base_Tas    : constant := 16#7E00_0000_0000#;
    Taille_Enregistrement : constant := 16;
 
-   procedure Charger_Image (Nom : String; Taille_Copile : Natural);
+   procedure Charger_Image (Nom : String; Taille_Copile : Natural);   -- image TX ou HX
+   function Format_HX return Boolean;              -- signature TLALOCHX (codi_HX)
    procedure Creer_Pile (Taille : Natural);
    procedure Creer_Tas (Taille : Natural);
 
@@ -27,8 +28,8 @@ package Memoire is
    function Fin_Pile     return Unsigned_64;
    function Fin_Tas      return Unsigned_64;
    function Vecteur_CE   return Unsigned_64;       -- CEV : cible des CHK en echec (0 : aucune)
-   function Table_Instructions  return Unsigned_64;  -- format 3 : adresse de la table (0 : absente)
-   function Nombre_Instructions return Natural;      -- format 3 : nombre d'instructions
+   function Table_Instructions  return Unsigned_64;  -- TX format 3, HX : adresse de la table (0 : absente)
+   function Nombre_Instructions return Natural;      -- entrees de la table
 
    --  Acces aux donnees, petit-boutiste ; les lectures rendent la valeur etendue par zeros
    function Lire_8  (A : Unsigned_64) return Unsigned_64;

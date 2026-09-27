@@ -11,19 +11,20 @@ package body Limites is
    G_M3   : constant := 3;
    G_M6   : constant := 6;
    G_M6RE : constant := 9;
+   G_M6T  : constant := 10;
 
-   type Modele is range 1 .. 17;
+   type Modele is range 1 .. 19;
    Genre   : constant array (Modele) of Integer :=
-     (G_M3, G_M3, G_M6, G_M6, G_M6RE, G_M6RE, G_M6RE, G_M6RE, G_M6RE, G_M6RE,
+     (G_M3, G_M3, G_M6, G_M6, G_M6RE, G_M6RE, G_M6RE, G_M6RE, G_M6T, G_M6T, G_M6T, G_M6T,
       G_M6RE, G_M6RE, G_M6RE, G_M6RE, G_M6RE, G_M6RE, G_M6RE);
    Fenetre : constant array (Modele) of Unsigned_64 :=
-     (64, 256, 64, 256, 64, 256, 64, 256, 64, 256,
+     (64, 256, 64, 256, 64, 256, 64, 256, 64, 256, 64, 256,
       128, 128, 256, 128, 256, 128, 256);
    Largeur : constant array (Modele) of Unsigned_64 :=      -- 0 : illimitee
-     (0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+     (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 4, 4, 6, 6, 8, 8);
    Tranche : constant array (Modele) of Integer :=           -- 0 : illimitee, 1 : 128, 2 : 64
-     (0, 0, 0, 0, 0, 0, 1, 1, 2, 2,
+     (0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2,
       1, 1, 1, 1, 1, 1, 1);
    Taille_Tranche : constant array (0 .. 2) of Unsigned_64 := (Unsigned_64'Last, 128, 64);
 
@@ -75,6 +76,13 @@ package body Limites is
    Max_Frames : constant := 4096;
    Frame_FP   : array (1 .. Max_Frames) of Unsigned_64 := (others => 0);   -- croissants
    Frame_PC   : array (1 .. Max_Frames) of Unsigned_64 := (others => 0);   -- adresse du LINK
+   Frame_Lvl  : array (1 .. Max_Frames) of Integer := (others => 0);       -- niveau statique
+   Frame_Fin  : array (1 .. Max_Frames) of Unsigned_64 := (others => 0);   -- FP + taille des locales
+   Frame_Ancien : array (1 .. Max_Frames) of Unsigned_64 := (others => 0); -- DISPLAY[lvl] avant
+   Disp       : array (0 .. 15) of Unsigned_64 := (others => 0);           -- display courant
+
+   --  regions memoire, pour classer les cibles des acces indirects
+   R_Pile, R_Fin_Pile, R_Copile, R_Fin_Copile, R_Tas, R_Fin_Tas : Unsigned_64 := 0;
    Nb_Frames  : Natural := 0;
 
    Taille_Exp  : constant := 1048576;                 -- ensemble des variables exposees
@@ -106,6 +114,10 @@ package body Limites is
    Lectures, Ecritures : array (Classe_Acces) of Compteur := (others => 0);
    Alias_ID, Alias_DI : Compteur := 0;
    Lect_Dir, Lect_Loc, Lect_Loc_Libre : Compteur := 0;
+   --  cibles des acces indirects (mots lus ou ecrits)
+   Ind_Total, Ind_Tranche64, Ind_Tranche128, Ind_Courant, Ind_Autres, Ind_Niveau0 : Compteur := 0;
+   Ind_Copile, Ind_Tas, Ind_Image, Ind_Pile_Hors_Frames : Compteur := 0;
+   Ind_Nommable, Ind_Non_Nommable, Ind_Non_Meme_Niveau : Compteur := 0;
    Bornes_Prof : constant array (1 .. 7) of Unsigned_64 := (16, 32, 64, 128, 256, 512, Unsigned_64'Last);
    Prof_Loc, Prof_Libre : array (1 .. 7) of Compteur := (others => 0);
    Nb_Serialisees, Nb_Debordements : Compteur := 0;
@@ -190,8 +202,19 @@ package body Limites is
 
    ------------------------------------------------------------------ interface
 
-   procedure Debut is
+   procedure Regions (Pile, Fin_Pile, Copile, Fin_Copile, Tas, Fin_Tas : Unsigned_64) is
    begin
+      R_Pile := Pile;
+      R_Fin_Pile := Fin_Pile;
+      R_Copile := Copile;
+      R_Fin_Copile := Fin_Copile;
+      R_Tas := Tas;
+      R_Fin_Tas := Fin_Tas;
+   end Regions;
+
+   procedure Debut (DSP : Unsigned_64) is
+   begin
+      DSP_Courant := DSP;
       Nb_Acces := 0;
       Serialise := False;
       Enregistrer := True;
@@ -267,18 +290,23 @@ package body Limites is
       DSP_Courant := DSP;
    end Marquer_Local;
 
-   procedure Lien (FP, PC_Link : Unsigned_64) is
+   procedure Lien (FP, PC_Link : Unsigned_64; Lvl : Integer; Locales : Unsigned_64) is
    begin
       if Nb_Frames < Max_Frames then
          Nb_Frames := Nb_Frames + 1;
          Frame_FP (Nb_Frames) := FP;
+         Frame_Fin (Nb_Frames) := FP + Locales;
          Frame_PC (Nb_Frames) := PC_Link;
+         Frame_Lvl (Nb_Frames) := Lvl;
+         Frame_Ancien (Nb_Frames) := Disp (Lvl);
       end if;
+      Disp (Lvl) := FP;
    end Lien;
 
    procedure Delien is
    begin
       if Nb_Frames > 0 then
+         Disp (Frame_Lvl (Nb_Frames)) := Frame_Ancien (Nb_Frames);
          Nb_Frames := Nb_Frames - 1;
       end if;
    end Delien;
@@ -286,9 +314,69 @@ package body Limites is
    procedure Retablir (DSP : Unsigned_64) is
    begin
       while Nb_Frames > 0 and then Frame_FP (Nb_Frames) > DSP loop
-         Nb_Frames := Nb_Frames - 1;
+         Delien;
       end loop;
    end Retablir;
+
+   --  cible d'un mot accede par pointeur : region, frame, profondeur, et validite
+   --  du nommage (lvl, disp) avec le display courant
+   procedure Classer_Indirect (Mot : Unsigned_64) is
+      A : constant Unsigned_64 := Shift_Left (Mot, 3);
+      Bas, Haut, Milieu : Natural;
+      Nommable : Boolean;
+   begin
+      Ind_Total := Ind_Total + 1;
+      if A - R_Copile < R_Fin_Copile - R_Copile then
+         Ind_Copile := Ind_Copile + 1;
+         return;
+      elsif A - R_Tas < R_Fin_Tas - R_Tas then
+         Ind_Tas := Ind_Tas + 1;
+         return;
+      elsif A - R_Pile >= R_Fin_Pile - R_Pile then
+         Ind_Image := Ind_Image + 1;                  -- donnees statiques de l'image
+         return;
+      end if;
+      if Nb_Frames = 0 or else A < Frame_FP (1) then
+         Ind_Pile_Hors_Frames := Ind_Pile_Hors_Frames + 1;
+         return;
+      end if;
+      Bas := 1;                                       -- dernier frame de FP <= A
+      Haut := Nb_Frames;
+      while Bas < Haut loop
+         Milieu := (Bas + Haut + 1) / 2;
+         if Frame_FP (Milieu) <= A then
+            Bas := Milieu;
+         else
+            Haut := Milieu - 1;
+         end if;
+      end loop;
+      if DSP_Courant >= A and then DSP_Courant - A < 64 * 8 then
+         Ind_Tranche64 := Ind_Tranche64 + 1;
+      elsif DSP_Courant >= A and then DSP_Courant - A < 128 * 8 then
+         Ind_Tranche128 := Ind_Tranche128 + 1;
+      elsif Frame_Lvl (Bas) = 0 then
+         Ind_Niveau0 := Ind_Niveau0 + 1;
+      elsif Bas = Nb_Frames then
+         Ind_Courant := Ind_Courant + 1;
+      else
+         Ind_Autres := Ind_Autres + 1;
+      end if;
+      --  (lvl, disp) convient si DISPLAY[lvl] designe bien le frame proprietaire ; un mot
+      --  au-dela des locales et sous le FP du frame suivant (pile d'evaluation de l'un,
+      --  parametre de l'autre) peut aussi etre nomme depuis le frame suivant
+      Nommable := Disp (Frame_Lvl (Bas)) = Frame_FP (Bas);
+      if not Nommable and then Bas < Nb_Frames and then A > Frame_Fin (Bas) then
+         Nommable := Disp (Frame_Lvl (Bas + 1)) = Frame_FP (Bas + 1);
+      end if;
+      if Nommable then
+         Ind_Nommable := Ind_Nommable + 1;
+      else
+         Ind_Non_Nommable := Ind_Non_Nommable + 1;
+         if Nb_Frames > 0 and then Frame_Lvl (Bas) = Frame_Lvl (Nb_Frames) then
+            Ind_Non_Meme_Niveau := Ind_Non_Meme_Niveau + 1;   -- recursion ou procedure soeur
+         end if;
+      end if;
+   end Classer_Indirect;
 
    --  identite statique d'une variable : (LINK de sa procedure, deplacement en mots)
    function Cle_Variable (PC_Link, FP, Mot : Unsigned_64) return Unsigned_64 is
@@ -360,8 +448,7 @@ package body Limites is
    end Exposer_Mot;
 
    --  Predit le transfert de controle de l'instruction et met les predicteurs a jour.
-   function Mal_Predit (Op : Integer; PC, Suivant : Unsigned_64) return Boolean is
-      Sequentiel : constant Unsigned_64 := PC + 16;
+   function Mal_Predit (Op : Integer; PC, Suivant, Sequentiel : Unsigned_64) return Boolean is
       I : Natural;
       Pris, Erreur : Boolean := False;
    begin
@@ -369,7 +456,7 @@ package body Limites is
          when OP_BT | OP_BF =>
             Nb_Cond := Nb_Cond + 1;
             Pris := Suivant /= Sequentiel;
-            I := Natural ((Shift_Right (PC, 4) xor Histoire) and Dernier_Gshare);
+            I := Natural ((Shift_Right (PC, Decalage_PC) xor Histoire) and Dernier_Gshare);
             Erreur := (Gshare (I) >= 2) /= Pris;
             if Pris and Gshare (I) < 3 then
                Gshare (I) := Gshare (I) + 1;
@@ -386,7 +473,7 @@ package body Limites is
          when OP_CALL | OP_CALLI =>
             if Op = OP_CALLI then
                Nb_Ind := Nb_Ind + 1;
-               I := Natural (Shift_Right (PC, 4) and Dernier_BTB);
+               I := Natural (Shift_Right (PC, Decalage_PC) and Dernier_BTB);
                Erreur := BTB (I) /= Suivant;
                BTB (I) := Suivant;
                if Erreur then
@@ -411,7 +498,7 @@ package body Limites is
       return Erreur;
    end Mal_Predit;
 
-   procedure Fin (Op : Integer; PC, Suivant : Unsigned_64) is
+   procedure Fin (Op : Integer; PC, Suivant, Sequentiel : Unsigned_64) is
       Lat : Unsigned_64 := Latence (Op);
       Lat_M : Unsigned_64;
       D, F, E, R, L, W, D_Adr : Unsigned_64;
@@ -425,8 +512,10 @@ package body Limites is
       Hors_Renomme : array (0 .. 2) of Boolean := (others => False);   -- par tranche
       Renomme_Lu   : array (0 .. 2) of Boolean := (others => False);
       Lat_T        : array (0 .. 2) of Unsigned_64;
+      Tranche_Lue  : array (0 .. 2) of Boolean := (others => False);   -- M6t : sans exposition
+      Lat_Tr       : array (0 .. 2) of Unsigned_64;
       Exposee      : Boolean;
-      Erreur : constant Boolean := Mal_Predit (Op, PC, Suivant);
+      Erreur : constant Boolean := Mal_Predit (Op, PC, Suivant, Sequentiel);
       Attend : Boolean;
    begin
       N := N + 1;
@@ -484,6 +573,11 @@ package body Limites is
                      if not Exposee then
                         Lect_Loc_Libre := Lect_Loc_Libre + 1;
                      end if;
+                     for T in 0 .. 2 loop                -- dans la tranche (M6t) ?
+                        if L_Prof (I) < Taille_Tranche (T) then
+                           Tranche_Lue (T) := True;
+                        end if;
+                     end loop;
                      for T in 0 .. 2 loop                -- renommee dans cette tranche ?
                         if not Exposee and then L_Prof (I) < Taille_Tranche (T) then
                            Renomme_Lu (T) := True;
@@ -507,6 +601,11 @@ package body Limites is
             Lat_T (T) := Latence_Renommee (Op, Lat);
          else
             Lat_T (T) := Lat;
+         end if;
+         if Tranche_Lue (T) then
+            Lat_Tr (T) := Latence_Renommee (Op, Lat);
+         else
+            Lat_Tr (T) := Lat;
          end if;
       end loop;
 
@@ -540,6 +639,7 @@ package body Limites is
          case Genre (M) is
             when G_M6   => Attend := Lit_Ind or Lit_Dir;
             when G_M6RE => Attend := Lit_Ind or Hors_Renomme (Tranche (M));
+            when G_M6T  => Attend := Lit_Ind or Lit_Dir;     -- regle de M6 : pas d'exposition
             when others => Attend := False;
          end case;
          if Attend then
@@ -547,6 +647,8 @@ package body Limites is
          end if;
          if Genre (M) = G_M6RE then
             Lat_M := Lat_T (Tranche (M));
+         elsif Genre (M) = G_M6T then
+            Lat_M := Lat_Tr (Tranche (M));
          else
             Lat_M := Lat;
          end if;
@@ -577,6 +679,7 @@ package body Limites is
          K := L_Index (I);
          if L_Classe (I) = Indirecte then
             Exposer_Mot (L_Mot (I));
+            Classer_Indirect (L_Mot (I));
          end if;
          if L_Sens (I) = Lecture then
             Lectures (L_Classe (I)) := Lectures (L_Classe (I)) + 1;
@@ -678,18 +781,20 @@ package body Limites is
       Ligne ("                                           ", 6);
       Ligne ("     tranche de pile de 128 mots           ", 7);
       Ligne ("                                           ", 8);
-      Ligne ("     tranche de pile de 64 mots            ", 9);
-      Ligne ("                                           ", 10);
+      Ligne ("M6t  tranche par intervalle, 128 mots      ", 9);
+      Ligne ("       (sans information d'exposition)     ", 10);
+      Ligne ("     tranche par intervalle, 64 mots       ", 11);
+      Ligne ("                                           ", 12);
       Ecrire ("");
       Ecrire ("  M6re, tranche de 128 mots, a largeur finie (L lancees et retirees par cycle) : IPC");
       Ecrire ("         largeur    fenetre 64   fenetre 128   fenetre 256");
       for I in 0 .. 2 loop
-         Ecrire ("  " & Cadre (Image (Vers_Signe (Largeur (Modele (12 + 2 * I)))), 14)
+         Ecrire ("  " & Cadre (Image (Vers_Signe (Largeur (Modele (14 + 2 * I)))), 14)
                  & Cadre ("-", 14)
-                 & Cadre (IPC (Max_Fin (Modele (12 + 2 * I))), 14)
-                 & Cadre (IPC (Max_Fin (Modele (13 + 2 * I))), 14));
+                 & Cadre (IPC (Max_Fin (Modele (14 + 2 * I))), 14)
+                 & Cadre (IPC (Max_Fin (Modele (15 + 2 * I))), 14));
       end loop;
-      Ecrire ("      illimitee" & Cadre (IPC (Max_Fin (7)), 14) & Cadre (IPC (Max_Fin (11)), 14)
+      Ecrire ("      illimitee" & Cadre (IPC (Max_Fin (7)), 14) & Cadre (IPC (Max_Fin (13)), 14)
               & Cadre (IPC (Max_Fin (8)), 14));
       Ecrire ("");
       Ecrire ("  prediction : gshare " & Image (Signe (Taille_Gshare)) & " compteurs, histoire "
@@ -720,6 +825,31 @@ package body Limites is
               & Cadre (Image (Signe (Lect_Loc_Libre)), 14) & Part (Lect_Loc_Libre, Lect_Loc));
       Ecrire ("  variables locales exposees (procedure, deplacement)  "
               & Cadre (Image (Signe (Nb_Exposees)), 14));
+      Ecrire ("  mots accedes par pointeur (lus ou ecrits)            " & Cadre (Image (Signe (Ind_Total)), 14));
+      Ecrire ("    pile : tranche de 64 mots sous le sommet          " & Cadre (Image (Signe (Ind_Tranche64)), 14)
+              & Part (Ind_Tranche64, Ind_Total));
+      Ecrire ("           de 64 a 128 mots sous le sommet            " & Cadre (Image (Signe (Ind_Tranche128)), 14)
+              & Part (Ind_Tranche128, Ind_Total));
+      Ecrire ("           frame courant, au-dela                     " & Cadre (Image (Signe (Ind_Courant)), 14)
+              & Part (Ind_Courant, Ind_Total));
+      Ecrire ("           autres frames actifs                       " & Cadre (Image (Signe (Ind_Autres)), 14)
+              & Part (Ind_Autres, Ind_Total));
+      Ecrire ("           niveau 0 (globales)                        " & Cadre (Image (Signe (Ind_Niveau0)), 14)
+              & Part (Ind_Niveau0, Ind_Total));
+      Ecrire ("           hors des frames                            " & Cadre (Image (Signe (Ind_Pile_Hors_Frames)), 14)
+              & Part (Ind_Pile_Hors_Frames, Ind_Total));
+      Ecrire ("    co-pile                                           " & Cadre (Image (Signe (Ind_Copile)), 14)
+              & Part (Ind_Copile, Ind_Total));
+      Ecrire ("    tas                                               " & Cadre (Image (Signe (Ind_Tas)), 14)
+              & Part (Ind_Tas, Ind_Total));
+      Ecrire ("    donnees statiques de l'image                      " & Cadre (Image (Signe (Ind_Image)), 14)
+              & Part (Ind_Image, Ind_Total));
+      Ecrire ("  pile : designables par (lvl, disp) avec le display courant "
+              & Cadre (Image (Signe (Ind_Nommable)), 11) & Part (Ind_Nommable, Ind_Nommable + Ind_Non_Nommable));
+      Ecrire ("         identite d'activation necessaire                 "
+              & Cadre (Image (Signe (Ind_Non_Nommable)), 11) & Part (Ind_Non_Nommable, Ind_Nommable + Ind_Non_Nommable));
+      Ecrire ("         dont frame de meme niveau que le frame courant   "
+              & Cadre (Image (Signe (Ind_Non_Meme_Niveau)), 11));
       Ecrire ("  lectures locales selon la profondeur sous le sommet (mots)   toutes     non exposees");
       for B in Bornes_Prof'Range loop
          if B < Bornes_Prof'Last then

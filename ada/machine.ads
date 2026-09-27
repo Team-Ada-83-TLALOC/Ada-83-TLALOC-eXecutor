@@ -10,6 +10,8 @@ package Machine is
    function Code_De_Sortie return Integer;
    function PC_Courant return Unsigned_64;
    function Code_Courant return Integer;
-   function Instructions_Executees return Signe;
+   function Instructions_Executees return Signe;   -- instructions executees (TX ou HX)
+   function Instructions_LLIR return Signe;        -- instructions LLIR representees
+   function Octets_Lus return Signe;               -- octets de code des instructions executees
 
 end Machine;

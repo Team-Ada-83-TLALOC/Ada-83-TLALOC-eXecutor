@@ -50,6 +50,7 @@ package body Memoire is
    Table_Adr      : Unsigned_64 := 0;     -- en-tete +56 (format 3)
    Table_Nb       : Natural := 0;         -- en-tete +64 (format 3)
    Debut_De_Copile : Unsigned_64 := 0;
+   Est_HX         : Boolean := False;
 
    Texte_Faute    : String (1 .. 300);
    Longueur_Faute : Natural := 0;
@@ -226,21 +227,38 @@ package body Memoire is
 
       for I in Signature'Range loop
          if Character'Val (Img.Donnees (I - 1)) /= Signature (I) then
-            Signaler ("signature TLALOCTX absente : ce n'est pas une image TX");
+            if I = 7 and then Character'Val (Img.Donnees (6)) = 'H'
+              and then Character'Val (Img.Donnees (7)) = 'X' then
+               Est_HX := True;
+               exit;
+            end if;
+            Signaler ("signature TLALOCTX ou TLALOCHX absente : ce n'est pas une image TX ni HX");
          end if;
       end loop;
-      if Mot_Image (8) = 3 then
+      if Est_HX then
+         if Mot_Image (8) /= 1 then
+            Signaler ("version de format HX non reconnue");
+         end if;
          Vecteur := Mot_Image (48);
          Table_Adr := Mot_Image (56);
          Table_Nb := Natural (Mot_Image (64));
-      elsif Mot_Image (8) = 2 then
-         Vecteur := Mot_Image (48);
-      elsif Mot_Image (8) /= 1 then
-         Signaler ("version de format TX non reconnue");
-      end if;
-      if Mot_Image (16) /= Base_Image or Mot_Image (24) /= Entree
-        or Mot_Image (40) /= Taille_Enregistrement then
-         Signaler ("en-tete TX incoherent (base, entree ou taille d'enregistrement)");
+         if Mot_Image (16) /= Base_Image or Mot_Image (24) /= Entree or Mot_Image (40) /= 0 then
+            Signaler ("en-tete HX incoherent (base, entree ou champ +40)");
+         end if;
+      else
+         if Mot_Image (8) = 3 then
+            Vecteur := Mot_Image (48);
+            Table_Adr := Mot_Image (56);
+            Table_Nb := Natural (Mot_Image (64));
+         elsif Mot_Image (8) = 2 then
+            Vecteur := Mot_Image (48);
+         elsif Mot_Image (8) /= 1 then
+            Signaler ("version de format TX non reconnue");
+         end if;
+         if Mot_Image (16) /= Base_Image or Mot_Image (24) /= Entree
+           or Mot_Image (40) /= Taille_Enregistrement then
+            Signaler ("en-tete TX incoherent (base, entree ou taille d'enregistrement)");
+         end if;
       end if;
       Taille_Code := Mot_Image (32);
       if Unsigned_64 (N) /= 16#78# + Taille_Code then
@@ -276,6 +294,11 @@ package body Memoire is
       Tas.Taille := Unsigned_64 (Taille);
       Tas.Donnees := Allouer (Taille);
    end Creer_Tas;
+
+   function Format_HX return Boolean is
+   begin
+      return Est_HX;
+   end Format_HX;
 
    function Fin_Code return Unsigned_64 is
    begin

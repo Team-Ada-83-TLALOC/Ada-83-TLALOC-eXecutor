@@ -1,0 +1,354 @@
+V "GNAT Lib v13"
+A -O2
+A -gnatn
+A -gnatp
+P SS ZX
+
+RN
+RV NO_ALLOCATORS
+RV NO_DIRECT_BOOLEAN_OPERATORS
+RV NO_EXCEPTION_HANDLERS
+RV NO_EXCEPTIONS
+RV NO_IO
+RV NO_LOCAL_ALLOCATORS
+RV NO_SECONDARY_STACK
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_UNCHECKED_ACCESS
+RV NO_UNCHECKED_CONVERSION
+RV NO_DEFAULT_INITIALIZATION
+RV NO_DYNAMIC_SIZED_OBJECTS
+RV NO_IMPLEMENTATION_ATTRIBUTES
+RV NO_IMPLEMENTATION_PRAGMAS
+RV NO_ELABORATION_CODE
+RV NO_OBSOLESCENT_FEATURES
+
+U memoire%b		memoire.adb		40590a92 OO PK
+W ada%s			ada.ads			ada.ali
+Z ada.exceptions%s	a-except.adb		a-except.ali
+Z ada.io_exceptions%s	a-ioexce.ads		a-ioexce.ali
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+Z ada.tags%s		a-tags.adb		a-tags.ali
+Z ada.unchecked_conversion%s
+W direct_io%s
+W interfaces%s		interfac.ads		interfac.ali
+Z interfaces.c_streams%s  i-cstrea.adb		i-cstrea.ali
+W system%s		system.ads		system.ali
+Z system.crtl%s		s-crtl.ads		s-crtl.ali
+Z system.direct_io%s	s-direio.adb		s-direio.ali
+Z system.file_control_block%s  s-ficobl.ads	s-ficobl.ali
+Z system.file_io%s	s-fileio.adb		s-fileio.ali
+Z system.secondary_stack%s  s-secsta.adb	s-secsta.ali
+Z system.storage_elements%s  s-stoele.adb	s-stoele.ali
+W unchecked_conversion%s
+
+U memoire%s		memoire.ads		bcbedd73 BN EE OO PK
+Z ada.strings.text_buffers%s  a-sttebu.adb	a-sttebu.ali
+W interfaces%s		interfac.ads		interfac.ali
+Z system%s		system.ads		system.ali
+Z system.exception_table%s  s-exctab.adb	s-exctab.ali
+Z system.standard_library%s  s-stalib.adb	s-stalib.ali
+
+D ada.ads		20240521074738 76789da1 ada%s
+D a-direio.ads		20240521074738 a93c9b31 ada.direct_io%s
+D a-direio.adb		20240521074738 48224b26 ada.direct_io%b
+D a-except.ads		20240521074738 2a7d8d70 ada.exceptions%s
+D a-finali.ads		20240521074738 bf4f806b ada.finalization%s
+D a-ioexce.ads		20240521074738 40018c65 ada.io_exceptions%s
+D a-stream.ads		20240521074738 119b8fb3 ada.streams%s
+D a-string.ads		20240521074738 90ac6797 ada.strings%s
+D a-sttebu.ads		20240521074738 f1ad67a2 ada.strings.text_buffers%s
+D a-stuten.ads		20240521074738 c6ced0ae ada.strings.utf_encoding%s
+D a-tags.ads		20240521074738 9eaa38c6 ada.tags%s
+D a-unccon.ads		20240521074738 0e9b276f ada.unchecked_conversion%s
+D a-uncdea.ads		20240521074738 c3a8ac65 ada.unchecked_deallocation%s
+D directio.ads		20240521074738 d9b35108 direct_io%s
+D interfac.ads		20240521074738 15f799c2 interfaces%s
+D i-cstrea.ads		20240521074738 e53d8b8e interfaces.c_streams%s
+D memoire.ads		20260927112248 a94944b1 memoire%s
+D memoire.adb		20260927112248 fa8c8133 memoire%b
+D system.ads		20240521074738 426dafb8 system%s
+D s-casuti.ads		20240521074738 cf13d755 system.case_util%s
+D s-crtl.ads		20240521074738 8a0692f8 system.crtl%s
+D s-direio.ads		20240521074738 7c86ede3 system.direct_io%s
+D s-exctab.ads		20240521074738 91bef6ef system.exception_table%s
+D s-exctab.adb		20240521074738 89d79d5b system.exception_table%b
+D s-ficobl.ads		20240521074738 dc5161d4 system.file_control_block%s
+D s-fileio.ads		20240521074738 45ce2f0f system.file_io%s
+D s-fileio.adb		20240521074738 be962c9a system.file_io%b
+D s-finroo.ads		20240521074738 4ff27390 system.finalization_root%s
+D s-os_lib.ads		20251218205951 53d49d2a system.os_lib%s
+D s-parame.ads		20251218205951 1f39ba92 system.parameters%s
+D s-putima.ads		20240521074738 17291fe4 system.put_images%s
+D s-secsta.ads		20240521074738 578279f5 system.secondary_stack%s
+D s-soflin.ads		20240521074738 df77073e system.soft_links%s
+D s-stache.ads		20240521074738 0b81c1fe system.stack_checking%s
+D s-stalib.ads		20240521074738 1c9580f6 system.standard_library%s
+D s-stoele.ads		20240521074738 ab5468e4 system.storage_elements%s
+D s-stoele.adb		20240521074738 8f5a9db6 system.storage_elements%b
+D s-string.ads		20240521074738 582aac7d system.strings%s
+D s-traent.ads		20240521074738 c81cbf8c system.traceback_entries%s
+D s-unstyp.ads		20240521074738 fa2a7f59 system.unsigned_types%s
+D unchconv.ads		20240521074738 ca2f9e18 unchecked_conversion%s
+G a e
+G c Z s b [signaler memoire 10 14 none]
+G c Z s b [message memoire 11 13 none]
+G c Z s b [charger_image memoire 19 14 none]
+G c Z s b [format_hx memoire 20 13 none]
+G c Z s b [creer_pile memoire 21 14 none]
+G c Z s b [creer_tas memoire 22 14 none]
+G c Z s b [fin_code memoire 25 13 none]
+G c Z s b [debut_copile memoire 26 13 none]
+G c Z s b [fin_copile memoire 27 13 none]
+G c Z s b [fin_pile memoire 28 13 none]
+G c Z s b [fin_tas memoire 29 13 none]
+G c Z s b [vecteur_ce memoire 30 13 none]
+G c Z s b [table_instructions memoire 31 13 none]
+G c Z s b [nombre_instructions memoire 32 13 none]
+G c Z s b [lire_8 memoire 35 13 none]
+G c Z s b [lire_16 memoire 36 13 none]
+G c Z s b [lire_32 memoire 37 13 none]
+G c Z s b [lire_64 memoire 38 13 none]
+G c Z s b [ecrire_8 memoire 39 14 none]
+G c Z s b [ecrire_16 memoire 40 14 none]
+G c Z s b [ecrire_32 memoire 41 14 none]
+G c Z s b [ecrire_64 memoire 42 14 none]
+G c Z s b [copier memoire 45 14 none]
+G c Z s b [egaux memoire 46 13 none]
+G c Z s b [lire_pile memoire 49 13 none]
+G c Z s b [ecrire_pile memoire 50 14 none]
+G c Z s b [lire_instruction memoire 53 14 none]
+G c Z b b [create memoire__octet_io 74 14 14_4]
+G c Z b b [open memoire__octet_io 80 14 14_4]
+G c Z b b [close memoire__octet_io 86 14 14_4]
+G c Z b b [delete memoire__octet_io 87 14 14_4]
+G c Z b b [reset memoire__octet_io 88 14 14_4]
+G c Z b b [reset memoire__octet_io 89 14 14_4]
+G c Z b b [mode memoire__octet_io 91 13 14_4]
+G c Z b b [name memoire__octet_io 92 13 14_4]
+G c Z b b [form memoire__octet_io 93 13 14_4]
+G c Z b b [is_open memoire__octet_io 95 13 14_4]
+G c Z b b [flush memoire__octet_io 97 14 14_4]
+G c Z b b [read memoire__octet_io 103 14 14_4]
+G c Z b b [read memoire__octet_io 108 14 14_4]
+G c Z b b [write memoire__octet_io 112 14 14_4]
+G c Z b b [write memoire__octet_io 117 14 14_4]
+G c Z b b [set_index memoire__octet_io 121 14 14_4]
+G c Z b b [index memoire__octet_io 123 13 14_4]
+G c Z b b [size memoire__octet_io 124 13 14_4]
+G c Z b b [end_of_file memoire__octet_io 126 13 14_4]
+G c Z b b [to_fcb memoire__octet_io 61 13 14_4]
+G c Z b b [to_dio memoire__octet_io 62 13 14_4]
+G c Z b b [octetsIP memoire 5 9 none]
+G c Z b b [de_huit memoire 21 13 none]
+G c Z b b [vers_huit memoire 22 13 none]
+G c Z b b [de_quatre memoire 23 13 none]
+G c Z b b [vers_quatre memoire 24 13 none]
+G c Z b b [de_deux memoire 25 13 none]
+G c Z b b [vers_deux memoire 26 13 none]
+G c Z b b [enregistrementIP memoire 30 9 none]
+G c Z b b [de_seize memoire 44 13 none]
+G c Z b b [mot_signe memoire 45 13 none]
+G c Z b b [regionIP memoire 8 9 none]
+G c Z b b [hexa memoire 74 13 none]
+G c Z b b [allouer memoire 86 13 none]
+G c Z b b [situer memoire 92 14 none]
+G c Z b b [lire memoire 112 13 none]
+G c Z b b [ecrire memoire 145 14 none]
+G c Z b b [mot_image memoire 197 13 none]
+X 2 a-direio.ads
+53P9*File_Type<22|81P9> 18|205r20[14]
+55E9*File_Mode
+55n23*In_File{55E9[18|14]} 18|211r37[14]
+66I9*Count<long_integer>
+80U14*Open 18|211s19[14]
+86U14*Close 18|226s16[14]
+108U14*Read 18|224s19[14]
+124V13*Size{66I9[18|14]} 18|216s30[14]
+X 14 directio.ads
+24k17*Direct_IO 18|1w6 14r28
+X 15 interfac.ads
+38K9*Interfaces 232e15 17|6w6 6r22
+47I9*Integer_8<short_short_integer> 18|32r13
+53I9*Integer_32<integer> 18|34r13
+56I9*Integer_64<long_long_integer> 18|45r52 412r25
+69M9*Unsigned_8 18|5r47 14r39 31r13 158r22
+72M9*Unsigned_16 18|25r60 26r54 33r13 156r42
+80M9*Unsigned_32 18|23r62 24r54 154r44
+83M9*Unsigned_64 17|25r33 26r33 27r33 28r33 29r33 30r33 31r40 35r26 35r46
+. 36r26 36r46 37r26 37r46 38r26 38r46 39r29 39r46 40r29 40r46 41r29 41r46
+. 42r29 42r46 45r37 46r31 49r28 49r48 50r31 50r48 53r38 56r42 57r42 18|9r17
+. 10r17 21r60 22r54 35r13 45r64 48r21 49r21 50r21 52r22 74r23 77r11 92r26
+. 92r43 94r11 112r23 112r56 116r18 130r23 137r23 140r20 145r26 145r56 149r18
+. 163r26 163r46 167r26 167r46 171r26 171r46 175r26 175r46 180r29 180r46 184r29
+. 184r46 188r29 188r46 192r29 192r46 197r44 207r21 264r10 280r24 287r22 294r21
+. 303r29 307r33 311r31 315r29 319r31 324r39 334r28 341r37 361r31 375r28 375r48
+. 376r20 386r31 386r48 387r20 395r38 398r42 399r42
+170V13*Shift_Right{83M9} 18|81s15
+X 17 memoire.ads
+7K9*Memoire 63l5 63e12 18|3b14 416l5 416t12
+9X4*Faute 18|66r13
+10U14*Signaler 10>24 18|58b14 67l8 67t16 108s7 214s13 218s10 235s13 240s13
+. 246s13 256s13 260s13 265s10 380s10 390s10 405s10
+10a24 Texte{string} 18|58b24 59r22 64r31 64r38 64r53
+11V13*Message{string} 18|69b13 72l8 72t15
+13N4*Base_Image 18|221r20 245r31 258r31 273r39 407r26
+14N4*Entree 18|245r63 258r63 267r22 268r26 404r15
+15N4*Base_Pile 18|286r21 376r39 387r39
+16N4*Base_Tas 18|293r20
+17N4*Taille_Enregistrement 18|259r33 404r49
+19U14*Charger_Image 19>29 19>43 18|204b14 282l8 282t21
+19a29 Nom{string} 18|204b29 211r46 214r56 218r45
+19i43 Taille_Copile{natural} 18|204b43 273r53
+20V13*Format_HX{boolean} 18|298b13 301l8 301t17
+21U14*Creer_Pile 21>26 18|284b14 289l8 289t18
+21i26 Taille{natural} 18|284b26 287r35 288r32
+22U14*Creer_Tas 22>25 18|291b14 296l8 296t17
+22i25 Taille{natural} 18|291b25 294r34 295r31
+25V13*Fin_Code{15|83M9} 18|303b13 306l8 306t16
+26V13*Debut_Copile{15|83M9} 18|307b13 310l8 310t20
+27V13*Fin_Copile{15|83M9} 18|311b13 314l8 314t18
+28V13*Fin_Pile{15|83M9} 61r61 18|315b13 318l8 318t16
+29V13*Fin_Tas{15|83M9} 18|334b13 337l8 337t15
+30V13*Vecteur_CE{15|83M9} 18|319b13 322l8 322t18
+31V13*Table_Instructions{15|83M9} 18|324b13 327l8 327t26
+32V13*Nombre_Instructions{natural} 18|329b13 332l8 332t27
+35V13*Lire_8{15|83M9} 35>22 59r19 18|163b13 166l8 166t14
+35m22 A{15|83M9} 18|163b22 165r20
+36V13*Lire_16{15|83M9} 36>22 59r27 18|167b13 170l8 170t15
+36m22 A{15|83M9} 18|167b22 169r20
+37V13*Lire_32{15|83M9} 37>22 59r36 18|171b13 174l8 174t15
+37m22 A{15|83M9} 18|171b22 173r20
+38V13*Lire_64{15|83M9} 38>22 59r45 18|175b13 178l8 178t15
+38m22 A{15|83M9} 18|175b22 177r20
+39U14*Ecrire_8 39>25 39>42 60r19 18|180b14 183l8 183t16
+39m25 A{15|83M9} 18|180b25 182r15
+39m42 V{15|83M9} 18|180b42 182r21
+40U14*Ecrire_16 40>25 40>42 60r29 18|184b14 187l8 187t17
+40m25 A{15|83M9} 18|184b25 186r15
+40m42 V{15|83M9} 18|184b42 186r21
+41U14*Ecrire_32 41>25 41>42 60r40 18|188b14 191l8 191t17
+41m25 A{15|83M9} 18|188b25 190r15
+41m42 V{15|83M9} 18|188b42 190r21
+42U14*Ecrire_64 42>25 42>42 60r51 18|192b14 195l8 195t17
+42m25 A{15|83M9} 18|192b25 194r15
+42m42 V{15|83M9} 18|192b42 194r21
+45U14*Copier 45>22 45>27 45>32 18|341b14 359l8 359t14
+45m22 Dst{15|83M9} 18|341b22 350r15 352r33 352r52
+45m27 Src{15|83M9} 18|341b27 349r15 352r39 352r58
+45m32 Lg{15|83M9} 18|341b32 346r10 349r20 350r20 351r21 352r64
+46V13*Egaux{boolean} 46>20 46>23 46>26 18|361b13 373l8 373t13
+46m20 A{15|83M9} 18|361b20 369r15
+46m23 B{15|83M9} 18|361b23 370r15
+46m26 Lg{15|83M9} 18|361b26 366r10 369r18 370r18 371r21
+49V13*Lire_Pile{15|83M9} 49>24 61r19 18|375b13 384l8 384t17
+49m24 A{15|83M9} 18|375b24 376r35 380r70
+50U14*Ecrire_Pile 50>27 50>44 61r30 18|386b14 393l8 393t19
+50m27 A{15|83M9} 18|386b27 387r35 390r70
+50m44 V{15|83M9} 18|386b44 392r67
+53U14*Lire_Instruction 53>32 54<32 55<32 56<32 57<32 61r43 18|395b14 414l8
+. 414t24
+53m32 PC{15|83M9} 18|395b32 404r10 404r30 405r60 407r21
+54i32 Op{integer} 18|396b32 410m7
+55i32 Lvl{integer} 18|397b32 411m7
+56m32 Ofs{15|83M9} 18|398b32 412m7
+57m32 Val{15|83M9} 18|399b32 413m7
+X 18 memoire.adb
+5A9 Octets(15|69M9)<integer> 6r32 18r22 19r22 20r22 29r21 88r18
+6P9 Acces_Octets(5A9) 11r17 86r47 93r30 113r11 146r11 274r29 342r22 362r18
+8R9 Region 12e14 47r21
+9m7*Debut{15|83M9} 96r21 100r20 104r20 221m11 286m12 293m11 313r18 317r19
+. 336r18
+10m7*Taille{15|83M9} 97r19 97r45 101r18 101r43 105r18 105r43 280m14 287m12
+. 294m11 313r30 317r32 336r30 379r19 389r19
+11p7*Donnees{6P9} 98r20 102r19 106r19 200r16 222m11 224m32 229r32 230r50
+. 231r43 277r32 279m14 288m12 295m11 382r17 392r12 408r16
+14K12 Octet_IO[2|43] 205r11 211r10 211r28 216r21 224r10 226r7
+18A12 Huit{5A9}<integer> 21r54 22r67 120r20 198r11 377r11
+19A12 Quatre{5A9}<integer> 23r54 24r67 127r20
+20A12 Deux{5A9}<integer> 25r54 26r67 134r20
+21V13 De_Huit[41|20]{15|83M9} 123s23 201s14 383s14
+22V13 Vers_Huit[41|20]{5A9} 152s31 392s56
+23V13 De_Quatre[41|20]{15|80M9} 130s36
+24V13 Vers_Quatre[41|20]{5A9} 154s31
+25V13 De_Deux[41|20]{15|72M9} 137s36
+26V13 Vers_Deux[41|20]{5A9} 156s31
+29A12 Seize{5A9}<integer> 44r51 401r11
+30R9 Enregistrement 36e14 37r8 44r58 402r11
+31m7*Op{15|69M9} 38r7 410r25
+32i7*Lvl{15|47I9} 39r7 411r25
+33m7*Res{15|72M9} 40r7
+34i7*Ofs{15|53I9} 41r7 412r39
+35m7*Val{15|83M9} 42r7 413r16
+44V13 De_Seize[41|20]{30R9} 409s12
+45V13 Mot_Signe[41|20]{15|83M9} 412s14
+47r4 Img{8R9} 100r16 101r14 101r39 102r15 200r12 221m7 222m7 224r28 229r28
+. 230r46 231r39 277r28 279m10 280m10 313r14 313r26 408r12
+47r9 Pile{8R9} 96r16 97r14 97r40 98r15 286m7 287m7 288m7 317r14 317r27 379r14
+. 382r12 389r14 392m7 392r7
+47r15 Tas{8R9} 104r16 105r14 105r39 106r15 293m7 294m7 295m7 336r14 336r26
+48m4 Fin_Du_Code{15|83M9} 267m7 305r14 404r35
+49m4 Vecteur{15|83M9} 242m10 250m13 254m13 321r14
+50m4 Table_Adr{15|83M9} 243m10 251m13 326r14
+51i4 Table_Nb{natural} 244m10 252m13 331r14
+52m4 Debut_De_Copile{15|83M9} 268m7 273r21 309r14
+53b4 Est_HX{boolean} 232m16 238r10 300r14
+55a4 Texte_Faute{string} 61r14 62r15 64m7 71r14
+56i4 Longueur_Faute{natural} 65m7 71r32
+59i7 N{natural} 61r10 62m10 64r25 64r67 65r25
+74V13 Hexa{string} 74b13 74>19 84l8 84t12 108s61 380s64 390s64 405s54
+74m19 V{15|83M9} 77r26
+75a7 Chiffres{string} 80r19
+76a7 R{string} 79r24 80m10 83r22
+77m7 X{15|83M9} 80r38 81m10 81r28
+79i11 I{integer} 80r13
+86V13 Allouer{6P9} 86b13 86>22 89l8 89t15 222s22 274s45 288s23 295s22
+86i22 Taille{natural} 88r31
+92U14 Situer 92b14 109l8 109t14 110r19 116s7 149s7 349s7 350s7 369s7 370s7
+94m7 D{15|83M9} 96m7 97r10 97r54 98r43 100m7 101r10 101r52 102r42 104m7 105r10
+. 105r52 106r42
+112V13 Lire{15|83M9} 112b13 142l8 142t12 143r19 165s14 169s14 173s14 177s14
+113p7 R{6P9} 116m35 116r35 122r21 129r21 136r21 140r33
+114i7 I{natural} 116m38 122r24 122r29 129r24 129r29 136r24 136r29 140r36
+120a16 H{18A12} 122m16 123r32
+127a16 Q{19A12} 129m16 130r47
+134a16 D{20A12} 136m16 137r45
+145U14 Ecrire 145b14 160l8 160t14 161r19 182s7 186s7 190s7 194s7
+146p7 R{6P9} 149m35 149r35 152r13 154r13 156r13 158r13
+147i7 I{natural} 149m38 152r16 152r21 154r16 154r21 156r16 156r21 158r16
+197V13 Mot_Image{15|83M9} 197b13 197>24 202l8 202t17 239s13 242s21 243s23
+. 244s31 245s13 245s45 245s73 249s13 250s24 251s26 252s34 253s16 254s24 255s16
+. 258s13 258s45 259s15 263s22
+197i24 I{natural} 200r25 200r30
+198a7 H{18A12} 200m7 201r23
+205p7 F{2|53P9[14]} 211m25 211r25 216r36 224r25 226m23 226r23
+206i7 N{natural} 216m7 217r10 222r31 223r21 264r23 276r24
+207m7 Taille_Code{15|83M9} 263m7 264r38 267r31 268r41
+208a7 Signature{string} 228r16 229r52
+223i11 I{integer} 224r41
+228i11 I{integer} 229r41 229r63 230r16
+272i10 Total{natural} 274r54 280r37
+274p10 Nouveau{6P9} 277r13 279r25
+276i14 I{integer} 277r22 277r41
+342p7 R_Src{6P9} 349m24 349r24 352r10 354r34 357r44
+342p14 R_Dst{6P9} 350m24 350r24 352r18 354r13 357r10
+343i7 I_Src{natural} 349m31 354r41 357r51 357r60
+343i14 I_Dst{natural} 350m31 354r20 357r17 357r26
+344i7 N{natural} 351m7 353r24 357r34 357r68
+353i14 K{integer} 354r28 354r49
+362p7 R_A{6P9} 369m22 369r22 372r14
+362p12 R_B{6P9} 370m22 370r22 372r41
+363i7 I_A{natural} 369m27 372r19 372r26
+363i12 I_B{natural} 370m27 372r46 372r53
+364i7 N{natural} 371m7 372r32 372r59
+376m7 D{15|83M9} 379r10 382r35 382r50
+377a7 H{18A12} 382m7 383r23
+387m7 D{15|83M9} 389r10 392r30 392r45
+400i7 I{natural} 407m7 408r25 408r30
+401a7 S{29A12} 408m7 409r22
+402r7 E{30R9} 409m7 410r23 411r23 412r37 413r14
+X 22 s-direio.ads
+81P9*File_Type(53R9)
+X 41 unchconv.ads
+20v10*Unchecked_Conversion 18|2w6 21r32 22r32 23r32 24r32 25r32 26r32 44r29
+. 45r30
+

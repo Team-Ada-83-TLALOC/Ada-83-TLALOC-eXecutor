@@ -9,6 +9,20 @@
       si lsb multiple de 8, w = 8, 16 ou 32, lsb + w <= taille chargee
  3. Champ a position et largeur constantes -> forme immediate
       LI lsb / LI w / UBFX|SBFX|BFI  -> UBFXI|SBFXI|BFII lsb, w
+ 4. Peephole : adresse produite par LVA/LA et consommee aussitot au sommet (lvl = -1)
+      LVA l, d / Bx , e      -> Bx l, d+e          (Bx : LVA, charges de la famille B)
+      LVA l, d / Cx , e, o   -> Cx l, d+e, o       (Cx : LIVA, charges de la famille C)
+      LA  l, d / Bx , e      -> Cx l, d, e         (LQ comme LA ; LB -> LIB, LVA -> LIVA...)
+      LIVA l, d, o / Bx , e  -> Cx l, d, o+e
+      LA  l, d / Cx , e, o      reste : double indirection
+   Les rangements ne sont pas concernes : leur adresse n'est pas au sommet.
+ 5. Adresse nulle : LVA sans operande (lvl = -1, disp = 0) laisse le sommet inchange
+      LVA  /  LVA -1  /  LVA -1, 0   -> supprimee
+    Les codis la suppriment deja a l'assemblage, y compris quand le deplacement est un
+    symbole valant 0 (premier composant d'un enregistrement) ; cette regle textuelle ne
+    fait qu'alleger le .FINC.
+Apres chaque reecriture, la ligne precedente est reexaminee : les regles s'enchainent
+(LA l,d / LD / LI 24 / LI 8 / UBFX  ->  LID l, d, 0 / LI 24 / LI 8 / UBFX  ->  ULIB l, d, 0+3).
 Seules des lignes consecutives sont reecrites ; une etiquette, un commentaire ou
 une ligne vide entre deux instructions empeche la reecriture."""
 import re, sys
@@ -20,6 +34,9 @@ CHARGE_C = {'LIB':1,'LIW':2,'LID':4,'LIQ':8,'LIA':8,'ULIB':1,'ULIW':2,'ULID':4}
 ETROITE = {('UBFX','B'):{8:'ULB',16:'ULW',32:'ULD'}, ('UBFX','C'):{8:'ULIB',16:'ULIW',32:'ULID'},
            ('SBFX','B'):{8:'LB', 16:'LW', 32:'LD'},  ('SBFX','C'):{8:'LIB', 16:'LIW', 32:'LID'}}
 IMMEDIAT = {'UBFX':'UBFXI', 'SBFX':'SBFXI', 'BFI':'BFII'}
+ACCES_B = ('LVA', 'LB', 'LW', 'LD', 'LQ', 'LA', 'ULB', 'ULW', 'ULD')
+ACCES_C = ('LIVA', 'LIB', 'LIW', 'LID', 'LIQ', 'LIA', 'ULIB', 'ULIW', 'ULID')
+B_VERS_C = dict(zip(ACCES_B, ACCES_C))
 
 def instr(l):
     if ';' in l:                                   # prudence : pas de reecriture si commentaire
@@ -41,6 +58,56 @@ def decaler(expr, k):
     if k == 0:
         return expr
     return '%s+%d' % (expr, k) if expr else str(k)
+
+def somme(d, e):
+    """expression d + e ; un operande vide vaut 0"""
+    if e in ('', '0'):
+        return d
+    if d in ('', '0'):
+        return e
+    if re.fullmatch(r'-?[\w.]+', e):
+        return d + e if e.startswith('-') else '%s+%s' % (d, e)
+    return '%s+(%s)' % (d, e)
+
+def peephole(b):
+    (p, p_ops), (x, x_ops) = b
+    if p == 'LIVA' and x in ACCES_B:                 # adresse [base + d] + o deja calculee
+        lvl, d, o = operandes(p_ops, 3)[:3]
+        x_lvl, e = operandes(x_ops, 2)[:2]
+        if lvl in ('', '-1') or x_lvl not in ('', '-1'):
+            return None
+        return '\t%s\t%s, %s, %s\n' % (B_VERS_C[x], lvl, d or '0', somme(o, e) or '0')
+    if p not in ('LVA', 'LA', 'LQ'):
+        return None
+    lvl, d = operandes(p_ops, 2)[:2]
+    if lvl in ('', '-1'):
+        return None                                  # l'adresse du producteur est elle-meme sur la pile
+    if x in ACCES_B:
+        x_lvl, e = operandes(x_ops, 2)[:2]
+        if x_lvl not in ('', '-1'):
+            return None
+        if p == 'LVA':
+            return '\t%s\t%s, %s\n' % (x, lvl, somme(d, e))
+        return '\t%s\t%s, %s, %s\n' % (B_VERS_C[x], lvl, d or '0', e or '0')
+    if p == 'LIVA':
+        return None
+    if x in ACCES_C and p == 'LVA':
+        x_lvl, e, o = operandes(x_ops, 3)[:3]
+        if x_lvl not in ('', '-1'):
+            return None
+        return '\t%s\t%s, %s, %s\n' % (x, lvl, somme(d, e), o or '0')
+    return None
+
+SUPPRIMER = object()                               # reecriture en aucune ligne
+
+def adresse_nulle(b):
+    (p, p_ops), = b
+    if p != 'LVA':
+        return None
+    lvl, d = operandes(p_ops, 2)[:2]
+    if lvl in ('', '-1') and d in ('', '0'):
+        return SUPPRIMER
+    return None
 
 def controle(b):
     if (b[0][0] == 'DUP' and b[4][0] == 'DUP' and b[1][0] in CHK and b[5][0] == b[1][0]
@@ -75,24 +142,32 @@ def forme_immediate(b):
         return None
     return '\t%s\t%d, %d\n' % (IMMEDIAT[b[2][0]], lsb, w)
 
+REGLES = (('CHK', 8, controle), ('peephole', 2, peephole),
+          ('charge etroite', 4, charge_etroite), ('forme immediate', 3, forme_immediate),
+          ('adresse nulle', 1, adresse_nulle))
+
 def reecrire(lignes):
-    sortie, i = [], 0
-    compte = {'CHK': 0, 'charge etroite': 0, 'forme immediate': 0}
+    lignes = list(lignes)
+    compte = dict((nom, 0) for nom, _, _ in REGLES)
+    i = 0
     while i < len(lignes):
         b = [instr(l) for l in lignes[i:i + 8]]
-        for nom, longueur, regle in (('CHK', 8, controle), ('charge etroite', 4, charge_etroite),
-                                     ('forme immediate', 3, forme_immediate)):
+        for nom, longueur, regle in REGLES:
             if len(b) >= longueur and None not in (x[0] for x in b[:longueur]):
                 nouvelle = regle(b[:longueur])
-                if nouvelle:
-                    sortie.append(nouvelle)
-                    i += longueur
+                if nouvelle is SUPPRIMER:
+                    lignes[i:i + longueur] = []
                     compte[nom] += 1
+                    i = max(i - 1, 0)
+                    break
+                if nouvelle:
+                    lignes[i:i + longueur] = [nouvelle]
+                    compte[nom] += 1
+                    i = max(i - 1, 0)                  # la ligne precedente peut se combiner
                     break
         else:
-            sortie.append(lignes[i])
             i += 1
-    return sortie, compte
+    return lignes, compte
 
 if __name__ == '__main__':
     for nom in sys.argv[1:]:
@@ -101,5 +176,7 @@ if __name__ == '__main__':
         sortie, compte = reecrire(lignes)
         with open(nom, 'w') as f:
             f.writelines(sortie)
-        print('%-24s CHK %6d   charges etroites %6d   formes immediates %6d'
-              % (nom, compte['CHK'], compte['charge etroite'], compte['forme immediate']))
+        print('%-24s CHK %6d   peephole %6d   charges etroites %6d   formes immediates %6d'
+              '   adresses nulles %6d'
+              % (nom, compte['CHK'], compte['peephole'], compte['charge etroite'],
+                 compte['forme immediate'], compte['adresse nulle']))

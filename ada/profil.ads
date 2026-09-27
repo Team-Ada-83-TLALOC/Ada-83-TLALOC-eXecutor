@@ -8,7 +8,8 @@ package Profil is
    type Compteur is range 0 .. 2**62;
 
    procedure Instruction (Op : Integer; Lvl : Integer;
-                          Ofs, Val : Unsigned_64; PC : Unsigned_64);
+                          Ofs, Val : Unsigned_64; PC : Unsigned_64;
+                          Longueur : Unsigned_64);   -- octets de l'instruction (TX : 16)
    procedure Acces (Lvl : Integer; Courant : Integer);   -- familles B et C
    procedure Service (N : Integer);                      -- TRAP n
    procedure Booleen_Non_Normalise (PC, V : Unsigned_64);  -- BT/BF sur valeur hors {0,1}
@@ -23,6 +24,11 @@ package Profil is
    Max_Niveau        : Integer := 0;
 
    function Total return Compteur;
+
+   --  Image HX : mesures exactes fournies par la machine avant le rapport
+   Image_HX          : Boolean := False;
+   Instructions_LLIR : Compteur := 0;         -- instructions LLIR representees
+   Octets_HX         : Compteur := 0;         -- octets de code HX lus
 
    procedure Rapport (Nom_Fichier : String);   -- "" : sur la sortie d'erreur
 

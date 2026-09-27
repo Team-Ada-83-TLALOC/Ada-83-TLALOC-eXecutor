@@ -1,2 +1,0 @@
-	include '../../src/expander/fasmg/codi_x86_64L.finc'
-include 'CORPS.FINC'

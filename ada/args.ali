@@ -1,0 +1,41 @@
+V "GNAT Lib v13"
+A -O2
+A -gnatn
+A -gnatp
+P ZX
+
+RN
+RV NO_STANDARD_STORAGE_POOLS
+RV NO_IMPLEMENTATION_PRAGMAS
+
+U args%b		args.adb		3a73ec23 NE OO PK
+W ada%s			ada.ads			ada.ali
+W ada.command_line%s	a-comlin.adb		a-comlin.ali
+
+U args%s		args.ads		82959f2b EE NE OO PK
+
+D ada.ads		20240521074738 76789da1 ada%s
+D a-comlin.ads		20240521074737 4aa66568 ada.command_line%s
+D args.ads		20260927112248 82959f2b args%s
+D args.adb		20260927112248 f2401660 args%b
+D system.ads		20240521074738 426dafb8 system%s
+G a e
+G c Z s b [nombre args 5 13 none]
+G c Z s b [argument args 6 13 none]
+G c Z s b [code_de_sortie args 7 14 none]
+X 1 ada.ads
+16K9*Ada 20e8 4|2r6 6r14 11r14 16r7 16r41
+X 2 a-comlin.ads
+36K13*Command_Line 144e21 4|2w10 6r18 11r18 16r11 16r45
+39V13*Argument_Count{natural} 4|6s31
+52V13*Argument{string} 4|11s31
+70I9*Exit_Status<integer> 4|16r58
+75U14*Set_Exit_Status 4|16s24
+X 3 args.ads
+4K9*Args 8l5 8e9 4|3b14 18l5 18t9
+5V13*Nombre{natural} 4|4b13 7l8 7t14
+6V13*Argument{string} 6>23 4|9b13 12l8 12t16
+6i23 N{positive} 4|9b23 11r41
+7U14*Code_De_Sortie 7>30 4|14b14 17l8 17t22
+7i30 Code{integer} 4|14b30 16r71
+

@@ -1,2 +1,0 @@
-	include '../../src/expander/fasmg/codi_TX.finc'
-include 'FAUTE.FINC'
