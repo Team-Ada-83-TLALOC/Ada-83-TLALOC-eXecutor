@@ -22,7 +22,18 @@ package body Profil is
    Acces_Pile, Acces_Local, Acces_Global, Acces_Englobant : Compteur := 0;
    Par_Niveau : array (0 .. 14) of Compteur := (others => 0);
 
-   Nb_Booleens, Nb_Decalages, Nb_Champs : Compteur := 0;
+   Nb_Booleens, Nb_Decalages : Compteur := 0;
+
+   --  champs de bits : largeur 0, largeur 64 (licite), largeur > 64, lsb + w > 64
+   Nb_Champ_W0, Nb_Champ_W64, Nb_Champ_W_Sup, Nb_Champ_Hors : Compteur := 0;
+
+   --  debordements signes sur 64 bits, par operation, et les 16 premiers sites
+   Par_Debordement : array (Operation_Entiere) of Compteur := (others => 0);
+   Max_Sites_D : constant := 16;
+   Site_PC, Site_A, Site_B : array (1 .. Max_Sites_D) of Unsigned_64 := (others => 0);
+   Site_Op : array (1 .. Max_Sites_D) of Operation_Entiere := (others => D_ADD);
+   Site_Nb : array (1 .. Max_Sites_D) of Compteur := (others => 0);
+   Nb_Sites_D : Integer := 0;
 
    --  BT/BF sur valeur hors {0,1} : les 16 premiers PC distincts
    Max_Signales : constant := 16;
@@ -464,10 +475,53 @@ package body Profil is
       Nb_Decalages := Nb_Decalages + 1;
    end Decalage_Hors_Mot;
 
-   procedure Champ_Limite is
+   procedure Champ (Lsb, Largeur : Unsigned_64) is
    begin
-      Nb_Champs := Nb_Champs + 1;
-   end Champ_Limite;
+      if Largeur = 0 then
+         Nb_Champ_W0 := Nb_Champ_W0 + 1;
+      elsif Largeur > 64 then
+         Nb_Champ_W_Sup := Nb_Champ_W_Sup + 1;
+      else
+         if Largeur = 64 then
+            Nb_Champ_W64 := Nb_Champ_W64 + 1;
+         end if;
+         if Lsb > 64 - Largeur then
+            Nb_Champ_Hors := Nb_Champ_Hors + 1;
+         end if;
+      end if;
+   end Champ;
+
+   procedure Debordement (Op : Operation_Entiere; PC, A, B : Unsigned_64) is
+   begin
+      Par_Debordement (Op) := Par_Debordement (Op) + 1;
+      for K in 1 .. Nb_Sites_D loop
+         if Site_PC (K) = PC then
+            Site_Nb (K) := Site_Nb (K) + 1;
+            return;
+         end if;
+      end loop;
+      if Nb_Sites_D < Max_Sites_D then
+         Nb_Sites_D := Nb_Sites_D + 1;
+         Site_PC (Nb_Sites_D) := PC;
+         Site_Op (Nb_Sites_D) := Op;
+         Site_A (Nb_Sites_D) := A;
+         Site_B (Nb_Sites_D) := B;
+         Site_Nb (Nb_Sites_D) := 1;
+      end if;
+   end Debordement;
+
+   function Nom_Operation (O : Operation_Entiere) return String is
+   begin
+      case O is
+         when D_ADD => return "ADD";
+         when D_SUB => return "SUB";
+         when D_MUL => return "MUL";
+         when D_NEG => return "NEG";
+         when D_ABS => return "ABS";
+         when D_INC => return "INC";
+         when D_DEC => return "DEC";
+      end case;
+   end Nom_Operation;
 
    function Total return Compteur is
    begin
@@ -810,7 +864,28 @@ package body Profil is
          end if;
       end loop;
       Ecrire ("  decalages de 64 positions ou plus   : " & Nombre (Nb_Decalages));
-      Ecrire ("  champs de bits de largeur 0 ou 64   : " & Nombre (Nb_Champs));
+      Ecrire ("  champs de bits de largeur 0         : " & Nombre (Nb_Champ_W0));
+      Ecrire ("  champs de bits de largeur 64        : " & Nombre (Nb_Champ_W64));
+      Ecrire ("  champs de bits de largeur > 64      : " & Nombre (Nb_Champ_W_Sup));
+      Ecrire ("  champs de bits avec lsb + w > 64    : " & Nombre (Nb_Champ_Hors));
+      declare
+         Total_D : Compteur := 0;
+      begin
+         for O in Operation_Entiere loop
+            Total_D := Total_D + Par_Debordement (O);
+         end loop;
+         Ecrire ("  debordements signes sur 64 bits     : " & Nombre (Total_D));
+         for O in Operation_Entiere loop
+            if Par_Debordement (O) > 0 then
+               Ecrire ("      " & Nom_Operation (O) & Nombre (Par_Debordement (O)));
+            end if;
+         end loop;
+         for K in 1 .. Nb_Sites_D loop
+            Ecrire ("      PC " & Hexa (Site_PC (K)) & "  " & Nom_Operation (Site_Op (K))
+                    & "  a = " & Hexa (Site_A (K)) & "  b = " & Hexa (Site_B (K))
+                    & Nombre (Site_Nb (K)) & " fois");
+         end loop;
+      end;
       Ecrire ("");
 
       Rapport_Paires;

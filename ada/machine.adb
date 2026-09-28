@@ -231,9 +231,6 @@ package body Machine is
 
    function Masque (Largeur : Unsigned_64) return Unsigned_64 is
    begin
-      if Largeur = 0 or Largeur >= 64 then
-         Profil.Champ_Limite;
-      end if;
       if Largeur = 0 then
          return 0;
       elsif Largeur >= 64 then
@@ -242,12 +239,28 @@ package body Machine is
       return Shift_Left (1, Natural (Largeur)) - 1;
    end Masque;
 
+   --  Debordement signe (faute 129) : releve pour le rapport, puis arret
+   procedure Debordement (Op : Profil.Operation_Entiere; A, B : Unsigned_64) is
+   begin
+      Profil.Debordement (Op, PC, A, B);
+      Signaler ("debordement signe sur 64 bits : NUMERIC_ERROR (faute 129)");
+   end Debordement;
+
+   --  Champ de bits : w dans 1 .. 64 et lsb + w <= 64, sinon faute 137
+   procedure Controler_Champ (Lsb, Largeur : Unsigned_64) is
+   begin
+      if Largeur = 0 or else Largeur > 64 or else Lsb > 64 - Largeur then
+         Signaler ("champ de bits hors du mot : operation indefinie (faute 137)");
+      end if;
+   end Controler_Champ;
+
    function Compte_Decalage (N : Unsigned_64) return Natural is
    begin
       if N >= 64 then
          Profil.Decalage_Hors_Mot;
+         Signaler ("compte de decalage de 64 ou plus : operation indefinie (faute 137)");
       end if;
-      return Natural (N and 63);                    -- modulo 64, comme la reference [Q6]
+      return Natural (N);                           -- 0 .. 63 (V7 ; jusqu'a la V6 : modulo 64)
    end Compte_Decalage;
 
    function Abs_Mot (S : Signe) return Unsigned_64 is
@@ -257,6 +270,26 @@ package body Machine is
       end if;
       return Vers_Mot (S);
    end Abs_Mot;
+
+   --  Le produit signe de A et B sort-il de [-2**63, 2**63) ?
+   function Deborde_Mul (A, B : Unsigned_64) return Boolean is
+      MA, MB, Limite : Unsigned_64;
+   begin
+      if ((A + 16#8000_0000#) or (B + 16#8000_0000#)) < 16#1_0000_0000# then
+         return False;                              -- |a|, |b| <= 2**31 : produit <= 2**62
+      end if;
+      if A = 0 or B = 0 then
+         return False;
+      end if;
+      MA := Abs_Mot (Vers_Signe (A));
+      MB := Abs_Mot (Vers_Signe (B));
+      if ((A xor B) and Bit_63) /= 0 then
+         Limite := Bit_63;                          -- produit negatif : jusqu'a 2**63
+      else
+         Limite := Bit_63 - 1;
+      end if;
+      return MA > Limite / MB;
+   end Deborde_Mul;
 
    --  Produit 64 x 64 -> 128 bits non signe
    procedure Mul_128 (X, Y : Unsigned_64; Haut, Bas : out Unsigned_64) is
@@ -642,16 +675,56 @@ package body Machine is
                end if;
 
             ---------------------------------------------------- arithmetique entiere
-            when OP_NEG => Remplacer_Sommet (0 - Sommet);
+            --  Debordement signe sur 64 bits : faute 129 (V7), arret sur diagnostic
+            --  en attendant les vecteurs de faute.
+            when OP_NEG =>
+               A := Sommet;
+               if A = Bit_63 then
+                  Debordement (Profil.D_NEG, A, 0);
+               end if;
+               Remplacer_Sommet (0 - A);
             when OP_ABS =>
                A := Sommet;
+               if A = Bit_63 then
+                  Debordement (Profil.D_ABS, A, 0);
+               end if;
                V := Shift_Right_Arithmetic (A, 63);
                Remplacer_Sommet ((A xor V) - V);
-            when OP_ADD => B := Depiler; Remplacer_Sommet (Sommet + B);
-            when OP_SUB => B := Depiler; Remplacer_Sommet (Sommet - B);
-            when OP_INC => Remplacer_Sommet (Sommet + 1);
-            when OP_DEC => Remplacer_Sommet (Sommet - 1);
-            when OP_MUL => B := Depiler; Remplacer_Sommet (Sommet * B);
+            when OP_ADD =>
+               B := Depiler;
+               A := Sommet;
+               V := A + B;
+               if ((A xor V) and (B xor V) and Bit_63) /= 0 then
+                  Debordement (Profil.D_ADD, A, B);
+               end if;
+               Remplacer_Sommet (V);
+            when OP_SUB =>
+               B := Depiler;
+               A := Sommet;
+               V := A - B;
+               if ((A xor B) and (A xor V) and Bit_63) /= 0 then
+                  Debordement (Profil.D_SUB, A, B);
+               end if;
+               Remplacer_Sommet (V);
+            when OP_INC =>
+               A := Sommet;
+               if A = Bit_63 - 1 then
+                  Debordement (Profil.D_INC, A, 1);
+               end if;
+               Remplacer_Sommet (A + 1);
+            when OP_DEC =>
+               A := Sommet;
+               if A = Bit_63 then
+                  Debordement (Profil.D_DEC, A, 1);
+               end if;
+               Remplacer_Sommet (A - 1);
+            when OP_MUL =>
+               B := Depiler;
+               A := Sommet;
+               if Deborde_Mul (A, B) then
+                  Debordement (Profil.D_MUL, A, B);
+               end if;
+               Remplacer_Sommet (A * B);
             when OP_DIV | OP_REMI | OP_MODI =>
                SB := Vers_Signe (Depiler);
                SA := Vers_Signe (Sommet);
@@ -677,6 +750,10 @@ package body Machine is
                   W := Ofs;
                   L := Val;
                end if;
+               if Avec_Profil then
+                  Profil.Champ (L, W);
+               end if;
+               Controler_Champ (L, W);
                Remplacer_Sommet (Shift_Right (Sommet, Compte_Decalage (L)) and Masque (W));
             when OP_SBFX | OP_SBFXI =>
                if Op = OP_SBFX then
@@ -686,12 +763,15 @@ package body Machine is
                   W := Ofs;
                   L := Val;
                end if;
+               if Avec_Profil then
+                  Profil.Champ (L, W);
+               end if;
+               Controler_Champ (L, W);
                V := Shift_Right (Sommet, Compte_Decalage (L));
                if W = 0 then
-                  Profil.Champ_Limite;
                   V := 0;
                elsif W >= 64 then
-                  Profil.Champ_Limite;
+                  null;
                else
                   V := Shift_Right_Arithmetic (Shift_Left (V, Natural (64 - W)), Natural (64 - W));
                end if;
@@ -704,6 +784,10 @@ package body Machine is
                   W := Ofs;
                   L := Val;
                end if;
+               if Avec_Profil then
+                  Profil.Champ (L, W);
+               end if;
+               Controler_Champ (L, W);
                V := Depiler;
                N := Unsigned_64 (Compte_Decalage (L));
                A := Masque (W);
