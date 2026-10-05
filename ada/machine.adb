@@ -37,6 +37,15 @@ package body Machine is
    Fini         : Boolean := False;
    Op_Courant   : Integer := 0;
    Limite_Pile  : Unsigned_64 := 0;          -- Fin_Pile - 8, fixe au chargement
+
+   --  -v : regle V8 des cellules de calcul. Une cellule de la pile data est marquee quand
+   --  elle est empilee, demarquee quand elle est depilee ou recouverte par l'allocation
+   --  d'un cadre (LINK) ; une ecriture calculee (rangement de famille B lvl = -1, de
+   --  famille C, blocs, EXC_MACH) dans une cellule marquee au plus a DSP est une faute.
+   Verif_Cellules : Boolean := False;
+   type Marques_T is array (Natural range <>) of Boolean;
+   type Marques_Acces is access Marques_T;
+   Marques : Marques_Acces := null;
    Max_DSP      : Unsigned_64 := 0;          -- plus haut sommet atteint (pour le profil)
    CEV          : Unsigned_64 := 0;          -- vecteur CONSTRAINT_ERROR des CHK
 
@@ -114,6 +123,51 @@ package body Machine is
 
    ---------------------------------------------------------------- pile data
 
+   ---------------------------------------------------------------- regle des cellules de calcul
+
+   procedure Activer_Verification is
+   begin
+      Verif_Cellules := True;
+   end Activer_Verification;
+
+   function Indice_Cellule (A : Unsigned_64) return Integer is   -- -1 : hors de la pile data
+   begin
+      if A >= Base_Pile and A < Fin_Pile then
+         return Integer ((A - Base_Pile) / 8);
+      end if;
+      return -1;
+   end Indice_Cellule;
+
+   procedure Marquer (A : Unsigned_64; Calcul : Boolean) is
+      I : constant Integer := Indice_Cellule (A);
+   begin
+      if I >= 0 then
+         Marques (I) := Calcul;
+      end if;
+   end Marquer;
+
+   procedure Verifier_Ecriture (A, N : Unsigned_64) is            -- N octets des A
+      I0, I1 : Integer;
+   begin
+      if not Verif_Cellules or N = 0 or A > DSP + 7 then
+         return;
+      end if;
+      I0 := Indice_Cellule (A);
+      if A + N - 1 > DSP + 7 then
+         I1 := Indice_Cellule (DSP);
+      else
+         I1 := Indice_Cellule (A + N - 1);
+      end if;
+      if I0 < 0 or I1 < I0 then
+         return;
+      end if;
+      for I in I0 .. I1 loop
+         if Marques (I) then
+            Signaler ("ecriture calculee dans une cellule de calcul (regle V8)");
+         end if;
+      end loop;
+   end Verifier_Ecriture;
+
    procedure Empiler (V : Unsigned_64) is
    begin
       if DSP >= Limite_Pile then
@@ -121,6 +175,9 @@ package body Machine is
       end if;
       DSP := DSP + 8;
       Ecrire_Pile (DSP, V);
+      if Verif_Cellules then
+         Marquer (DSP, True);
+      end if;
       if Avec_Limites then
          Limites.Acces (DSP, 8, Limites.Ecriture, Limites.Pile);
       end if;
@@ -138,6 +195,9 @@ package body Machine is
       V := Lire_Pile (DSP);
       if Avec_Limites then
          Limites.Acces (DSP, 8, Limites.Lecture, Limites.Pile);
+      end if;
+      if Verif_Cellules then
+         Marquer (DSP, False);
       end if;
       DSP := DSP - 8;
       return V;
@@ -410,6 +470,9 @@ package body Machine is
       Limite_Pile := Fin_Pile - 8;
       CEV := Vecteur_CE;
       Max_DSP := DSP;
+      if Verif_Cellules then
+         Marques := new Marques_T'(0 .. Natural ((Fin_Pile - Base_Pile) / 8) => False);
+      end if;
       Display := (others => 0);
       Display (0) := Base_Pile;
       CSP := Debut_Copile;                      -- premier « frame » de co-pile
@@ -503,6 +566,13 @@ package body Machine is
          return Display (Lvl);
       end Base_B;
 
+      procedure Verifier_Calcule (A, N : Unsigned_64) is    -- famille B : adresse prise sur la pile
+      begin
+         if Lvl = -1 then
+            Verifier_Ecriture (A, N);
+         end if;
+      end Verifier_Calcule;
+
       function Adresse_C return Unsigned_64 is    -- adresse effective de famille C
          P : Unsigned_64;
       begin
@@ -546,6 +616,7 @@ package body Machine is
          if Vers_Signe (Lg) < 0 then
             Signaler ("longueur de bloc negative");
          end if;
+         Verifier_Ecriture (Dst, Lg);
          K := 0;
          while K < Lg loop
             X := Lire_8 (Src + K);
@@ -666,15 +737,15 @@ package body Machine is
             when OP_ULID => Empiler (Lire_32 (Adresse_C));
 
             ---------------------------------------------------- rangements : la donnee est au sommet
-            when OP_SB => V := Depiler; Ecrire_8  (Base_B + Val, V);
-            when OP_SW => V := Depiler; Ecrire_16 (Base_B + Val, V);
-            when OP_SD => V := Depiler; Ecrire_32 (Base_B + Val, V);
-            when OP_SQ | OP_SA => V := Depiler; Ecrire_64 (Base_B + Val, V);
+            when OP_SB => V := Depiler; A := Base_B + Val; Verifier_Calcule (A, 1); Ecrire_8  (A, V);
+            when OP_SW => V := Depiler; A := Base_B + Val; Verifier_Calcule (A, 2); Ecrire_16 (A, V);
+            when OP_SD => V := Depiler; A := Base_B + Val; Verifier_Calcule (A, 4); Ecrire_32 (A, V);
+            when OP_SQ | OP_SA => V := Depiler; A := Base_B + Val; Verifier_Calcule (A, 8); Ecrire_64 (A, V);
 
-            when OP_SIB => V := Depiler; Ecrire_8  (Adresse_C, V);
-            when OP_SIW => V := Depiler; Ecrire_16 (Adresse_C, V);
-            when OP_SID => V := Depiler; Ecrire_32 (Adresse_C, V);
-            when OP_SIQ | OP_SIA => V := Depiler; Ecrire_64 (Adresse_C, V);
+            when OP_SIB => V := Depiler; A := Adresse_C; Verifier_Ecriture (A, 1); Ecrire_8  (A, V);
+            when OP_SIW => V := Depiler; A := Adresse_C; Verifier_Ecriture (A, 2); Ecrire_16 (A, V);
+            when OP_SID => V := Depiler; A := Adresse_C; Verifier_Ecriture (A, 4); Ecrire_32 (A, V);
+            when OP_SIQ | OP_SIA => V := Depiler; A := Adresse_C; Verifier_Ecriture (A, 8); Ecrire_64 (A, V);
 
             ---------------------------------------------------- logique, decalages
             when OP_ET  => B := Depiler; Remplacer_Sommet (Sommet and B);
@@ -927,6 +998,13 @@ package body Machine is
                if Arrondi_8 (Val) >= Fin_Pile - DSP then
                   Signaler ("debordement de la pile data (variables locales)");
                end if;
+               if Verif_Cellules then                   -- variables locales : pas de calcul
+                  N := 8;
+                  while N <= Arrondi_8 (Val) loop
+                     Marquer (DSP + N, False);
+                     N := N + 8;
+                  end loop;
+               end if;
                DSP := DSP + Arrondi_8 (Val);
                if DSP > Max_DSP then
                   Max_DSP := DSP;
@@ -1003,6 +1081,7 @@ package body Machine is
                Verifier_Niveau (Lvl);
                Classe_Courante := Limites.Directe;
                A := Display (Lvl) + Val;
+               Verifier_Ecriture (A + 16, Unsigned_64 (48 + 8 * Lvl));
                Ecrire_64 (A + 16, DSP);
                Ecrire_64 (A + 24, Unsigned_64 (RSP));
                Ecrire_64 (A + 32, CFP);
@@ -1053,6 +1132,7 @@ package body Machine is
                   Limites.Acces (A, N, Limites.Lecture, Limites.Indirecte);
                   Limites.Acces (B, N, Limites.Ecriture, Limites.Indirecte);
                end if;
+               Verifier_Ecriture (B, N);
                Copier (B, A, N);
             when OP_BLKAND | OP_BLKOU | OP_BLKOUX =>
                Operation_Bloc (Op);
@@ -1065,6 +1145,7 @@ package body Machine is
                if Vers_Signe (N) < 0 then
                   Signaler ("longueur de bloc negative");
                end if;
+               Verifier_Ecriture (A, N);
                B := 0;
                while B < N loop
                   Ecrire_8 (A + B, Lire_8 (A + B) xor 1);

@@ -1,6 +1,6 @@
 --  TX_RUN : interprete des images TX (codi_TX.finc) et HX (codi_HX.finc) produites par fasmg.
 --
---    tx_run [-p rapport] [-x trace] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image
+--    tx_run [-p rapport] [-x trace] [-v] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image
 --
 --  Le format est reconnu a la signature de l'en-tete (TLALOCTX ou TLALOCHX). Une image HX
 --  est decodee par Decodeur_HX puis executee avec la meme semantique ; son rapport ajoute
@@ -8,6 +8,9 @@
 --
 --  -p rapport   ecrit le profil dynamique dans le fichier rapport ("-" : sortie d'erreur)
 --  -x trace     ecrit le pc de chaque instruction executee, une ligne par instruction
+--  -v           verifie la regle V8 des cellules de calcul : aucune ecriture calculee
+--               (rangement par pointeur, bloc, EXC_MACH) dans une cellule empilee et non
+--               encore depilee ; faute a la premiere violation
 --  -l           etude de limites du parallelisme dans le rapport
 --  -f           disposition du code (flux unique / double flux) et chargement
 --  -n limite    arrete l'execution apres ce nombre d'instructions
@@ -44,7 +47,7 @@ procedure TX_Run is
    procedure Usage is
    begin
       Text_IO.Put_Line (Text_IO.Standard_Error,
-        "usage : tx_run [-p rapport] [-x trace] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image");
+        "usage : tx_run [-p rapport] [-x trace] [-v] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image");
       Args.Code_De_Sortie (2);
    end Usage;
 
@@ -92,6 +95,8 @@ begin
          elsif A = "-x" then
             I := I + 1;
             Stocker (Args.Argument (I), Nom_Trace, Lg_Trace);
+         elsif A = "-v" then
+            Machine.Activer_Verification;
          elsif A = "-l" then
             Avec_Limites := True;
          elsif A = "-f" then

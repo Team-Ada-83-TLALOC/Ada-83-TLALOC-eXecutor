@@ -13,6 +13,7 @@ package Machine is
    procedure Ouvrir_Trace (Nom : String);   -- -x : pc de chaque instruction executee
 
    procedure Fermer_Trace;
+   procedure Activer_Verification;          -- -v : regle V8 des cellules de calcul (avant Initialiser)
    function PC_Courant return Unsigned_64;
    function Code_Courant return Integer;
    function Instructions_Executees return Signe;   -- instructions executees (TX ou HX)
