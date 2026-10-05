@@ -8,6 +8,11 @@ package Machine is
    procedure Executer;                        -- jusqu'a SYS_EXIT ; les fautes levent Memoire.Faute
 
    function Code_De_Sortie return Integer;
+
+
+   procedure Ouvrir_Trace (Nom : String);   -- -x : pc de chaque instruction executee
+
+   procedure Fermer_Trace;
    function PC_Courant return Unsigned_64;
    function Code_Courant return Integer;
    function Instructions_Executees return Signe;   -- instructions executees (TX ou HX)

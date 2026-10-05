@@ -1,12 +1,13 @@
 --  TX_RUN : interprete des images TX (codi_TX.finc) et HX (codi_HX.finc) produites par fasmg.
 --
---    tx_run [-p rapport] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image
+--    tx_run [-p rapport] [-x trace] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image
 --
 --  Le format est reconnu a la signature de l'en-tete (TLALOCTX ou TLALOCHX). Une image HX
 --  est decodee par Decodeur_HX puis executee avec la meme semantique ; son rapport ajoute
 --  le compte des instructions LLIR representees (table des instructions et ses drapeaux).
 --
 --  -p rapport   ecrit le profil dynamique dans le fichier rapport ("-" : sortie d'erreur)
+--  -x trace     ecrit le pc de chaque instruction executee, une ligne par instruction
 --  -l           etude de limites du parallelisme dans le rapport
 --  -f           disposition du code (flux unique / double flux) et chargement
 --  -n limite    arrete l'execution apres ce nombre d'instructions
@@ -30,6 +31,8 @@ procedure TX_Run is
    Lg_Image    : Natural := 0;
    Nom_Rapport : String (1 .. 1024);
    Lg_Rapport  : Natural := 0;
+   Nom_Trace   : String (1 .. 1024);
+   Lg_Trace    : Natural := 0;
    Avec_Profil : Boolean := False;
    Avec_Limites : Boolean := False;
    Avec_Frontal : Boolean := False;
@@ -41,7 +44,7 @@ procedure TX_Run is
    procedure Usage is
    begin
       Text_IO.Put_Line (Text_IO.Standard_Error,
-        "usage : tx_run [-p rapport] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image");
+        "usage : tx_run [-p rapport] [-x trace] [-l] [-f] [-n limite] [-c copile_Mio] [-t tas_Mio] [-d pile_Mio] image");
       Args.Code_De_Sortie (2);
    end Usage;
 
@@ -79,13 +82,16 @@ begin
       declare
          A : constant String := Args.Argument (I);
       begin
-         if (A = "-p" or A = "-n" or A = "-c" or A = "-t" or A = "-d") and I = Args.Nombre then
+         if (A = "-p" or A = "-x" or A = "-n" or A = "-c" or A = "-t" or A = "-d") and I = Args.Nombre then
             Usage;
             return;
          elsif A = "-p" then
             I := I + 1;
             Stocker (Args.Argument (I), Nom_Rapport, Lg_Rapport);
             Avec_Profil := True;
+         elsif A = "-x" then
+            I := I + 1;
+            Stocker (Args.Argument (I), Nom_Trace, Lg_Trace);
          elsif A = "-l" then
             Avec_Limites := True;
          elsif A = "-f" then
@@ -133,7 +139,11 @@ begin
          Frontal.Actif := True;
       end if;
       Machine.Initialiser (Avec_Profil, Limite, Avec_Limites);
+      if Lg_Trace > 0 then
+         Machine.Ouvrir_Trace (Nom_Trace (1 .. Lg_Trace));
+      end if;
       Machine.Executer;
+      Machine.Fermer_Trace;
       Code := Machine.Code_De_Sortie;
    exception
       when Memoire.Faute =>

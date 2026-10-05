@@ -5,6 +5,8 @@ with Hote;
 with Limites;
 with Frontal;
 with Decodeur_HX;
+with Text_IO;
+with Mots;
 package body Machine is
 
    Nb_Niveaux  : constant := 15;             -- DISPLAY[0..14]
@@ -25,6 +27,8 @@ package body Machine is
    Avec_Limites : Boolean := False;
    Classe_Courante : Limites.Classe_Acces := Limites.Indirecte;   -- acces explicite en cours
    Limite_Instr : Signe := 0;
+   Avec_Trace   : Boolean := False;
+   Trace        : Text_IO.File_Type;
    Nb_Executees : Signe := 0;
    Nb_LLIR      : Signe := 0;                -- instructions LLIR representees (HX : poids)
    Nb_Octets    : Signe := 0;                -- octets de code lus
@@ -439,6 +443,20 @@ package body Machine is
       return Op_Courant;
    end Code_Courant;
 
+   procedure Ouvrir_Trace (Nom : String) is
+   begin
+      Text_IO.Create (Trace, Text_IO.Out_File, Nom);
+      Avec_Trace := True;
+   end Ouvrir_Trace;
+
+   procedure Fermer_Trace is
+   begin
+      if Avec_Trace then
+         Text_IO.Close (Trace);
+         Avec_Trace := False;
+      end if;
+   end Fermer_Trace;
+
    function Instructions_Executees return Signe is
    begin
       return Nb_Executees;
@@ -594,6 +612,9 @@ package body Machine is
             Classe_Courante := Limites.Indirecte;
          end if;
          Nb_Executees := Nb_Executees + 1;
+         if Avec_Trace then
+            Text_IO.Put_Line (Trace, Mots.Hexa (PC));
+         end if;
          if Limite_Instr > 0 and then Nb_Executees > Limite_Instr then
             Signaler ("limite du nombre d'instructions atteinte");
          end if;
