@@ -41,7 +41,8 @@ package body Machine is
    --  -v : regle V8 des cellules de calcul. Une cellule de la pile data est marquee quand
    --  elle est empilee, demarquee quand elle est depilee ou recouverte par l'allocation
    --  d'un cadre (LINK) ; une ecriture calculee (rangement de famille B lvl = -1, de
-   --  famille C, blocs, EXC_MACH) dans une cellule marquee au plus a DSP est une faute.
+   --  famille C, blocs, EXC_MACH) dans une cellule marquee au plus a DSP est une faute ;
+   --  tout acces au-dessus de DSP aussi, et un UNLINK qui ferait remonter DSP.
    Verif_Cellules : Boolean := False;
    type Marques_T is array (Natural range <>) of Boolean;
    type Marques_Acces is access Marques_T;
@@ -146,9 +147,17 @@ package body Machine is
       end if;
    end Marquer;
 
+   procedure Verifier_Acces (A, N : Unsigned_64) is               -- aucun acces au-dessus de DSP
+   begin
+      if Verif_Cellules and N > 0 and A + N - 1 >= Base_Pile and A < Fin_Pile and A + N - 1 > DSP + 7 then
+         Signaler ("acces a la pile data au-dessus de DSP (regle V8)");
+      end if;
+   end Verifier_Acces;
+
    procedure Verifier_Ecriture (A, N : Unsigned_64) is            -- N octets des A
       I0, I1 : Integer;
    begin
+      Verifier_Acces (A, N);
       if not Verif_Cellules or N = 0 or A > DSP + 7 then
          return;
       end if;
@@ -570,6 +579,8 @@ package body Machine is
       begin
          if Lvl = -1 then
             Verifier_Ecriture (A, N);
+         else
+            Verifier_Acces (A, N);
          end if;
       end Verifier_Calcule;
 
@@ -617,6 +628,7 @@ package body Machine is
             Signaler ("longueur de bloc negative");
          end if;
          Verifier_Ecriture (Dst, Lg);
+         Verifier_Acces (Src, Lg);
          K := 0;
          while K < Lg loop
             X := Lire_8 (Src + K);
@@ -720,21 +732,21 @@ package body Machine is
                Empiler (Adresse_C);
 
             ---------------------------------------------------- chargements
-            when OP_LB  => Empiler (Etendre_8  (Lire_8  (Base_B + Val)));
-            when OP_LW  => Empiler (Etendre_16 (Lire_16 (Base_B + Val)));
-            when OP_LD  => Empiler (Etendre_32 (Lire_32 (Base_B + Val)));
-            when OP_LQ | OP_LA => Empiler (Lire_64 (Base_B + Val));
-            when OP_ULB => Empiler (Lire_8  (Base_B + Val));
-            when OP_ULW => Empiler (Lire_16 (Base_B + Val));
-            when OP_ULD => Empiler (Lire_32 (Base_B + Val));
+            when OP_LB => A := Base_B + Val; Verifier_Acces (A, 1); Empiler (Etendre_8  (Lire_8  (A)));
+            when OP_LW => A := Base_B + Val; Verifier_Acces (A, 2); Empiler (Etendre_16 (Lire_16 (A)));
+            when OP_LD => A := Base_B + Val; Verifier_Acces (A, 4); Empiler (Etendre_32 (Lire_32 (A)));
+            when OP_LQ | OP_LA => A := Base_B + Val; Verifier_Acces (A, 8); Empiler (Lire_64 (A));
+            when OP_ULB => A := Base_B + Val; Verifier_Acces (A, 1); Empiler (Lire_8  (A));
+            when OP_ULW => A := Base_B + Val; Verifier_Acces (A, 2); Empiler (Lire_16 (A));
+            when OP_ULD => A := Base_B + Val; Verifier_Acces (A, 4); Empiler (Lire_32 (A));
 
-            when OP_LIB  => Empiler (Etendre_8  (Lire_8  (Adresse_C)));
-            when OP_LIW  => Empiler (Etendre_16 (Lire_16 (Adresse_C)));
-            when OP_LID  => Empiler (Etendre_32 (Lire_32 (Adresse_C)));
-            when OP_LIQ | OP_LIA => Empiler (Lire_64 (Adresse_C));
-            when OP_ULIB => Empiler (Lire_8  (Adresse_C));
-            when OP_ULIW => Empiler (Lire_16 (Adresse_C));
-            when OP_ULID => Empiler (Lire_32 (Adresse_C));
+            when OP_LIB => A := Adresse_C; Verifier_Acces (A, 1); Empiler (Etendre_8  (Lire_8  (A)));
+            when OP_LIW => A := Adresse_C; Verifier_Acces (A, 2); Empiler (Etendre_16 (Lire_16 (A)));
+            when OP_LID => A := Adresse_C; Verifier_Acces (A, 4); Empiler (Etendre_32 (Lire_32 (A)));
+            when OP_LIQ | OP_LIA => A := Adresse_C; Verifier_Acces (A, 8); Empiler (Lire_64 (A));
+            when OP_ULIB => A := Adresse_C; Verifier_Acces (A, 1); Empiler (Lire_8  (A));
+            when OP_ULIW => A := Adresse_C; Verifier_Acces (A, 2); Empiler (Lire_16 (A));
+            when OP_ULID => A := Adresse_C; Verifier_Acces (A, 4); Empiler (Lire_32 (A));
 
             ---------------------------------------------------- rangements : la donnee est au sommet
             when OP_SB => V := Depiler; A := Base_B + Val; Verifier_Calcule (A, 1); Ecrire_8  (A, V);
@@ -1032,6 +1044,9 @@ package body Machine is
                   Signaler ("UNLINK 0 : LINK 0 n'a pas sauve de frame pointer");
                end if;
                Verifier_Niveau (Lvl);
+               if Verif_Cellules and Display (Lvl) > DSP then
+                  Signaler ("UNLINK ferait remonter DSP (regle V8)");
+               end if;
                DSP := Display (Lvl);
                Display (Lvl) := Depiler;
                if Op = OP_UNLINKR then
@@ -1132,7 +1147,7 @@ package body Machine is
                   Limites.Acces (A, N, Limites.Lecture, Limites.Indirecte);
                   Limites.Acces (B, N, Limites.Ecriture, Limites.Indirecte);
                end if;
-               Verifier_Ecriture (B, N);
+               Verifier_Ecriture (B, N); Verifier_Acces (A, N);
                Copier (B, A, N);
             when OP_BLKAND | OP_BLKOU | OP_BLKOUX =>
                Operation_Bloc (Op);
@@ -1162,6 +1177,7 @@ package body Machine is
                   Limites.Acces (A, N, Limites.Lecture, Limites.Indirecte);
                   Limites.Acces (B, N, Limites.Lecture, Limites.Indirecte);
                end if;
+               Verifier_Acces (A, N); Verifier_Acces (B, N);
                Empiler (Booleen (Egaux (A, B, N)));
             when OP_LEXCMP =>                             -- ( @g lg @d ld -- -1|0|+1 )
                declare
@@ -1174,6 +1190,8 @@ package body Machine is
                   Res : Signe := 0;
                   Decide : Boolean := False;
                begin
+                  if Lg_G > 0 then Verifier_Acces (AG, Unsigned_64 (Lg_G) * Unsigned_64 (abs Pas)); end if;
+                  if Lg_D > 0 then Verifier_Acces (AD, Unsigned_64 (Lg_D) * Unsigned_64 (abs Pas)); end if;
                   while Lg_G > 0 and Lg_D > 0 loop
                      CG := Composant (AG);
                      CD := Composant (AD);

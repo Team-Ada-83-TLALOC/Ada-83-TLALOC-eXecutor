@@ -8,9 +8,10 @@
 --
 --  -p rapport   ecrit le profil dynamique dans le fichier rapport ("-" : sortie d'erreur)
 --  -x trace     ecrit le pc de chaque instruction executee, une ligne par instruction
---  -v           verifie la regle V8 des cellules de calcul : aucune ecriture calculee
+--  -v           verifie les regles V8 de la pile data : aucune ecriture calculee
 --               (rangement par pointeur, bloc, EXC_MACH) dans une cellule empilee et non
---               encore depilee ; faute a la premiere violation
+--               encore depilee ; aucun acces (lecture ou ecriture) au-dessus de DSP ;
+--               UNLINK ne fait pas remonter DSP ; faute a la premiere violation
 --  -l           etude de limites du parallelisme dans le rapport
 --  -f           disposition du code (flux unique / double flux) et chargement
 --  -n limite    arrete l'execution apres ce nombre d'instructions
