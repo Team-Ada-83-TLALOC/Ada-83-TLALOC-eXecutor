@@ -48,6 +48,18 @@ package body Machine is
    type Marques_Acces is access Marques_T;
    Marques : Marques_Acces := null;
    Exposees : Marques_Acces := null;         -- cellule designee par un LVA depuis son push
+
+   --  regle V8 de la co-pile : la cellule ou LINK sauve CFP n'est ecrite que par LINK tant
+   --  que le frame vit ; -v compare ce que relit UNLINK a ce que LINK y a range (table de
+   --  hachage : une entree ecrasee n'est plus verifiee)
+   Ombre_Taille : constant Natural := 65536;
+   type Ombre_Entree is record
+      Adresse, Valeur : Unsigned_64 := 0;
+      Valide          : Boolean := False;
+   end record;
+   type Ombre_Table is array (0 .. Ombre_Taille - 1) of Ombre_Entree;
+   type Ombre_Acces is access Ombre_Table;
+   Ombre : Ombre_Acces := null;
    Max_DSP      : Unsigned_64 := 0;          -- plus haut sommet atteint (pour le profil)
    CEV          : Unsigned_64 := 0;          -- vecteur CONSTRAINT_ERROR des CHK
 
@@ -520,6 +532,7 @@ package body Machine is
       if Verif_Cellules then
          Marques := new Marques_T'(0 .. Natural ((Fin_Pile - Base_Pile) / 8) => False);
          Exposees := new Marques_T'(0 .. Natural ((Fin_Pile - Base_Pile) / 8) => False);
+         Ombre := new Ombre_Table;
       end if;
       Display := (others => 0);
       Display (0) := Base_Pile;
@@ -1085,6 +1098,9 @@ package body Machine is
                   Limites.Registre (Limites.Reg_CSP, Limites.Ecriture);
                end if;
                Ecrire_64 (CSP, CFP);
+               if Verif_Cellules then
+                  Ombre (Natural ((CSP / 8) mod Unsigned_64 (Ombre_Taille))) := (CSP, CFP, True);
+               end if;
                CFP := CSP;
                CSP := CSP + 8;
                Niveau_De (RSP) := Lvl;
@@ -1111,6 +1127,15 @@ package body Machine is
                   end if;
                end if;
                Classe_Courante := Limites.Pile;
+               if Verif_Cellules then
+                  declare
+                     E : Ombre_Entree renames Ombre (Natural ((CFP / 8) mod Unsigned_64 (Ombre_Taille)));
+                  begin
+                     if E.Valide and then E.Adresse = CFP and then E.Valeur /= Lire_64 (CFP) then
+                        Signaler ("UNLINK relit un CFP sauve que LINK n'a pas ecrit (regle V8)");
+                     end if;
+                  end;
+               end if;
                CFP := Lire_64 (CFP);
                if Avec_Limites then
                   Limites.Delien;

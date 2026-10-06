@@ -13,7 +13,8 @@
 --               encore depilee ; aucun acces (lecture ou ecriture) au-dessus de DSP ;
 --               UNLINK ne fait pas remonter DSP ; une lecture calculee (chargement, CHK,
 --               cellule pointeur) ne lit une cellule de calcul que designee par un LVA a
---               adresse connue depuis son push ; faute a la premiere violation
+--               adresse connue depuis son push ; UNLINK relit en M64[CFP] la valeur que
+--               LINK y a rangee ; faute a la premiere violation
 --  -l           etude de limites du parallelisme dans le rapport
 --  -f           disposition du code (flux unique / double flux) et chargement
 --  -n limite    arrete l'execution apres ce nombre d'instructions
