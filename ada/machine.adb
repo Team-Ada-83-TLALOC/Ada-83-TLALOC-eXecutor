@@ -47,6 +47,7 @@ package body Machine is
    type Marques_T is array (Natural range <>) of Boolean;
    type Marques_Acces is access Marques_T;
    Marques : Marques_Acces := null;
+   Exposees : Marques_Acces := null;         -- cellule designee par un LVA depuis son push
    Max_DSP      : Unsigned_64 := 0;          -- plus haut sommet atteint (pour le profil)
    CEV          : Unsigned_64 := 0;          -- vecteur CONSTRAINT_ERROR des CHK
 
@@ -144,6 +145,9 @@ package body Machine is
    begin
       if I >= 0 then
          Marques (I) := Calcul;
+         if Calcul then
+            Exposees (I) := False;                   -- push : nouvelle cellule, non designee
+         end if;
       end if;
    end Marquer;
 
@@ -176,6 +180,37 @@ package body Machine is
          end if;
       end loop;
    end Verifier_Ecriture;
+
+   procedure Exposer (A : Unsigned_64) is              -- LVA a adresse connue : sa cellule
+      I : constant Integer := Indice_Cellule (A);
+   begin
+      if I >= 0 then
+         Exposees (I) := True;
+      end if;
+   end Exposer;
+
+   procedure Verifier_Lecture (A, N : Unsigned_64) is              -- lecture calculee de N octets
+      I0, I1 : Integer;
+   begin
+      Verifier_Acces (A, N);
+      if not Verif_Cellules or N = 0 or A > DSP + 7 then
+         return;
+      end if;
+      I0 := Indice_Cellule (A);
+      if A + N - 1 > DSP + 7 then
+         I1 := Indice_Cellule (DSP);
+      else
+         I1 := Indice_Cellule (A + N - 1);
+      end if;
+      if I0 < 0 or I1 < I0 then
+         return;
+      end if;
+      for I in I0 .. I1 loop
+         if Marques (I) and not Exposees (I) then
+            Signaler ("lecture calculee d'une cellule de calcul non designee par un LVA (regle V8)");
+         end if;
+      end loop;
+   end Verifier_Lecture;
 
    procedure Empiler (V : Unsigned_64) is
    begin
@@ -226,6 +261,9 @@ package body Machine is
          Limites.Acces (DSP, 8, Limites.Ecriture, Limites.Pile);
       end if;
       Ecrire_Pile (DSP, V);
+      if Verif_Cellules then
+         Marquer (DSP, True);                        -- pop et push : nouvelle cellule
+      end if;
    end Remplacer_Sommet;
    pragma Inline (Empiler, Depiler, Sommet, Remplacer_Sommet);
 
@@ -481,6 +519,7 @@ package body Machine is
       Max_DSP := DSP;
       if Verif_Cellules then
          Marques := new Marques_T'(0 .. Natural ((Fin_Pile - Base_Pile) / 8) => False);
+         Exposees := new Marques_T'(0 .. Natural ((Fin_Pile - Base_Pile) / 8) => False);
       end if;
       Display := (others => 0);
       Display (0) := Base_Pile;
@@ -575,6 +614,15 @@ package body Machine is
          return Display (Lvl);
       end Base_B;
 
+      procedure Verifier_Lu (A, N : Unsigned_64) is         -- famille B : lecture, calculee si lvl = -1
+      begin
+         if Lvl = -1 then
+            Verifier_Lecture (A, N);
+         else
+            Verifier_Acces (A, N);
+         end if;
+      end Verifier_Lu;
+
       procedure Verifier_Calcule (A, N : Unsigned_64) is    -- famille B : adresse prise sur la pile
       begin
          if Lvl = -1 then
@@ -606,6 +654,9 @@ package body Machine is
          end if;
          if Avec_Limites then
             Limites.Adresse_Suivante;                 -- le pointeur lu est l'adresse de l'element
+         end if;
+         if Lvl = -1 then
+            Verifier_Lecture (P + Val, 8);             -- cellule pointeur a adresse calculee
          end if;
          P := Lire_64 (P + Val) + Ofs;
          Classe_Courante := Limites.Indirecte;        -- l'element designe ne l'est pas
@@ -727,26 +778,30 @@ package body Machine is
 
             ---------------------------------------------------- adresses
             when OP_LVA =>
-               Empiler (Base_B + Val);
+               A := Base_B + Val;
+               if Verif_Cellules and Lvl /= -1 then
+                  Exposer (A);                              -- regle V8 de l'exposition
+               end if;
+               Empiler (A);
             when OP_LIVA =>
                Empiler (Adresse_C);
 
             ---------------------------------------------------- chargements
-            when OP_LB => A := Base_B + Val; Verifier_Acces (A, 1); Empiler (Etendre_8  (Lire_8  (A)));
-            when OP_LW => A := Base_B + Val; Verifier_Acces (A, 2); Empiler (Etendre_16 (Lire_16 (A)));
-            when OP_LD => A := Base_B + Val; Verifier_Acces (A, 4); Empiler (Etendre_32 (Lire_32 (A)));
-            when OP_LQ | OP_LA => A := Base_B + Val; Verifier_Acces (A, 8); Empiler (Lire_64 (A));
-            when OP_ULB => A := Base_B + Val; Verifier_Acces (A, 1); Empiler (Lire_8  (A));
-            when OP_ULW => A := Base_B + Val; Verifier_Acces (A, 2); Empiler (Lire_16 (A));
-            when OP_ULD => A := Base_B + Val; Verifier_Acces (A, 4); Empiler (Lire_32 (A));
+            when OP_LB => A := Base_B + Val; Verifier_Lu (A, 1); Empiler (Etendre_8  (Lire_8  (A)));
+            when OP_LW => A := Base_B + Val; Verifier_Lu (A, 2); Empiler (Etendre_16 (Lire_16 (A)));
+            when OP_LD => A := Base_B + Val; Verifier_Lu (A, 4); Empiler (Etendre_32 (Lire_32 (A)));
+            when OP_LQ | OP_LA => A := Base_B + Val; Verifier_Lu (A, 8); Empiler (Lire_64 (A));
+            when OP_ULB => A := Base_B + Val; Verifier_Lu (A, 1); Empiler (Lire_8  (A));
+            when OP_ULW => A := Base_B + Val; Verifier_Lu (A, 2); Empiler (Lire_16 (A));
+            when OP_ULD => A := Base_B + Val; Verifier_Lu (A, 4); Empiler (Lire_32 (A));
 
-            when OP_LIB => A := Adresse_C; Verifier_Acces (A, 1); Empiler (Etendre_8  (Lire_8  (A)));
-            when OP_LIW => A := Adresse_C; Verifier_Acces (A, 2); Empiler (Etendre_16 (Lire_16 (A)));
-            when OP_LID => A := Adresse_C; Verifier_Acces (A, 4); Empiler (Etendre_32 (Lire_32 (A)));
-            when OP_LIQ | OP_LIA => A := Adresse_C; Verifier_Acces (A, 8); Empiler (Lire_64 (A));
-            when OP_ULIB => A := Adresse_C; Verifier_Acces (A, 1); Empiler (Lire_8  (A));
-            when OP_ULIW => A := Adresse_C; Verifier_Acces (A, 2); Empiler (Lire_16 (A));
-            when OP_ULID => A := Adresse_C; Verifier_Acces (A, 4); Empiler (Lire_32 (A));
+            when OP_LIB => A := Adresse_C; Verifier_Lecture (A, 1); Empiler (Etendre_8  (Lire_8  (A)));
+            when OP_LIW => A := Adresse_C; Verifier_Lecture (A, 2); Empiler (Etendre_16 (Lire_16 (A)));
+            when OP_LID => A := Adresse_C; Verifier_Lecture (A, 4); Empiler (Etendre_32 (Lire_32 (A)));
+            when OP_LIQ | OP_LIA => A := Adresse_C; Verifier_Lecture (A, 8); Empiler (Lire_64 (A));
+            when OP_ULIB => A := Adresse_C; Verifier_Lecture (A, 1); Empiler (Lire_8  (A));
+            when OP_ULIW => A := Adresse_C; Verifier_Lecture (A, 2); Empiler (Lire_16 (A));
+            when OP_ULID => A := Adresse_C; Verifier_Lecture (A, 4); Empiler (Lire_32 (A));
 
             ---------------------------------------------------- rangements : la donnee est au sommet
             when OP_SB => V := Depiler; A := Base_B + Val; Verifier_Calcule (A, 1); Ecrire_8  (A, V);
@@ -1228,6 +1283,9 @@ package body Machine is
                else
                   K := Op - OP_CHKIB;
                   A := Adresse_C;                           -- forme C
+               end if;
+               if Op > OP_CHKUD or Lvl = -1 then
+                  Verifier_Lecture (A, 2 * Taille_De (K));   -- bornes a adresse calculee
                end if;
                SA := Vers_Signe (Sommet);
                if SA < Borne (A, K) or else SA > Borne (A + Taille_De (K), K) then

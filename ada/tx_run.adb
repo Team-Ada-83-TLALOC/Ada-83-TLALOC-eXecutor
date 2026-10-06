@@ -11,7 +11,9 @@
 --  -v           verifie les regles V8 de la pile data : aucune ecriture calculee
 --               (rangement par pointeur, bloc, EXC_MACH) dans une cellule empilee et non
 --               encore depilee ; aucun acces (lecture ou ecriture) au-dessus de DSP ;
---               UNLINK ne fait pas remonter DSP ; faute a la premiere violation
+--               UNLINK ne fait pas remonter DSP ; une lecture calculee (chargement, CHK,
+--               cellule pointeur) ne lit une cellule de calcul que designee par un LVA a
+--               adresse connue depuis son push ; faute a la premiere violation
 --  -l           etude de limites du parallelisme dans le rapport
 --  -f           disposition du code (flux unique / double flux) et chargement
 --  -n limite    arrete l'execution apres ce nombre d'instructions
